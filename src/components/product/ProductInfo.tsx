@@ -2,20 +2,32 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
-  Breadcrumb, 
-  BreadcrumbItem, 
-  BreadcrumbLink, 
-  BreadcrumbList, 
-  BreadcrumbPage, 
-  BreadcrumbSeparator 
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, 
+  BreadcrumbPage, BreadcrumbSeparator 
 } from "@/components/ui/breadcrumb";
 import { Minus, Plus } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import pantheonImage from "@/assets/pantheon.jpg";
 
 const ProductInfo = () => {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
+
+  const handleAddToCart = () => {
+    for (let i = 0; i < quantity; i++) {
+      addToCart({
+        id: 1,
+        name: "Pantheon",
+        price: "€2,850",
+        image: pantheonImage,
+        category: "Earrings",
+      });
+    }
+    setQuantity(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -23,21 +35,11 @@ const ProductInfo = () => {
       <div className="hidden lg:block">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/category/earrings">Earrings</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink asChild><Link to="/category/earrings">Earrings</Link></BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Pantheon</BreadcrumbPage>
-            </BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbPage>Pantheon</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
@@ -61,17 +63,14 @@ const ProductInfo = () => {
           <h3 className="text-sm font-light text-foreground">Material</h3>
           <p className="text-sm font-light text-muted-foreground">18k Gold Plated Sterling Silver</p>
         </div>
-        
         <div className="space-y-2">
           <h3 className="text-sm font-light text-foreground">Dimensions</h3>
           <p className="text-sm font-light text-muted-foreground">2.5cm x 1.2cm</p>
         </div>
-        
         <div className="space-y-2">
           <h3 className="text-sm font-light text-foreground">Weight</h3>
           <p className="text-sm font-light text-muted-foreground">4.2g per earring</p>
         </div>
-        
         <div className="space-y-2">
           <h3 className="text-sm font-light text-foreground">Editor's notes</h3>
           <p className="text-sm font-light text-muted-foreground italic">"A modern interpretation of classical architecture, these earrings bridge timeless elegance with contemporary minimalism."</p>
@@ -83,23 +82,11 @@ const ProductInfo = () => {
         <div className="flex items-center gap-4">
           <span className="text-sm font-light text-foreground">Quantity</span>
           <div className="flex items-center border border-border">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={decrementQuantity}
-              className="h-10 w-10 p-0 hover:bg-transparent hover:opacity-50 rounded-none border-none"
-            >
+            <Button variant="ghost" size="sm" onClick={decrementQuantity} className="h-10 w-10 p-0 hover:bg-transparent hover:opacity-50 rounded-none border-none">
               <Minus className="h-4 w-4" />
             </Button>
-            <span className="h-10 flex items-center px-4 text-sm font-light min-w-12 justify-center border-l border-r border-border">
-              {quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={incrementQuantity}
-              className="h-10 w-10 p-0 hover:bg-transparent hover:opacity-50 rounded-none border-none"
-            >
+            <span className="h-10 flex items-center px-4 text-sm font-light min-w-12 justify-center border-l border-r border-border">{quantity}</span>
+            <Button variant="ghost" size="sm" onClick={incrementQuantity} className="h-10 w-10 p-0 hover:bg-transparent hover:opacity-50 rounded-none border-none">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -107,6 +94,7 @@ const ProductInfo = () => {
 
         <Button 
           className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-light rounded-none"
+          onClick={handleAddToCart}
         >
           Add to Bag
         </Button>
