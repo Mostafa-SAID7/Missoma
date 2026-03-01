@@ -84,7 +84,7 @@ const ProductCarousel = () => {
                  className="basis-1/2 md:basis-1/3 lg:basis-1/4 pr-2 md:pr-4"
                >
                  <Link to={`/product/${product.id}`}>
-                  <Card className="border-none shadow-none bg-transparent group">
+                  <Card className="border-none shadow-none bg-transparent group transition-transform duration-200 hover:scale-[1.03]">
                     <CardContent className="p-0">
                       <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative rounded-lg">
                         <img

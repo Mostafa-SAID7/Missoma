@@ -200,7 +200,7 @@ const ProductGrid = () => {
           {products.map((product) => (
             <Link key={product.id} to={`/product/${product.id}`}>
               <Card 
-                className="border-none shadow-none bg-transparent group cursor-pointer"
+                className="border-none shadow-none bg-transparent group cursor-pointer transition-transform duration-200 hover:scale-[1.03]"
               >
                 <CardContent className="p-0">
                   <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative rounded-lg">
