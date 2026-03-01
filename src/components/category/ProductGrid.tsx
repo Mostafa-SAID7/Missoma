@@ -203,7 +203,7 @@ const ProductGrid = () => {
                 className="border-none shadow-none bg-transparent group cursor-pointer"
               >
                 <CardContent className="p-0">
-                  <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative">
+                  <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative rounded-lg">
                     <img
                       src={product.image}
                       alt={product.name}
