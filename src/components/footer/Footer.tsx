@@ -74,7 +74,7 @@ const Footer = () => {
       <div className="border-t border-[#e5e5e5] -mx-6 px-6 pt-2">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm font-light text-black mb-1 md:mb-0">
-            © {currentYear} Missoma. All rights reserved. Template made by{" "}
+            © 2024 - {currentYear} Missoma. All rights reserved. Template made by{" "}
             <a href="https://m-said-portfolio.netlify.app/" target="_blank" rel="noopener noreferrer" className="hover:text-black/70 transition-colors underline">
               M.said
             </a>
