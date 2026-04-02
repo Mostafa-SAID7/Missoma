@@ -8,6 +8,31 @@
 /* Missoma E-commerce Design System - Minimalist & Modern */
 
 @layer base {
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+
+  /* Firefox Scrollbar */
+  * {
+    scrollbar-color: #d0d0d0 #f5f5f5;
+    scrollbar-width: thin;
+  }
   :root {
     /* Core neutral palette */
     --background: 0 0% 96%;
