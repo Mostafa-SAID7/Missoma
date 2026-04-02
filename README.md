@@ -180,7 +180,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👥 Team
 
-**Missoma** is developed and maintained by the Linea Jewelry team.
+**Missoma** is developed and maintained by the Missoma Jewelry team.
 
 ## 📞 Support
 
