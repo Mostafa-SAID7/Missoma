@@ -1,0 +1,19 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Favicon Background -->
+  <rect width="100" height="100" fill="#000000"/>
+  
+  <!-- M Letter -->
+  <g>
+    <!-- Left vertical line -->
+    <line x1="20" y1="70" x2="20" y2="30" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Left diagonal to peak -->
+    <line x1="20" y1="30" x2="50" y2="55" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Right diagonal from peak -->
+    <line x1="50" y1="55" x2="80" y2="30" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Right vertical line -->
+    <line x1="80" y1="30" x2="80" y2="70" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>
