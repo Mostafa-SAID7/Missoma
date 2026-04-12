@@ -12,7 +12,7 @@ const LargeHero = () => {
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
-        <div className="w-full aspect-[16/9] mb-4 overflow-hidden rounded-2xl shadow-lg">
+        <div className="w-full aspect-[21/9] mb-4 overflow-hidden rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)]">
           <img
             src={heroImage}
             alt="Modern jewelry collection"

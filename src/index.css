@@ -173,8 +173,8 @@
     @apply transition-all duration-500 ease-out;
   }
   .hover-lift:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px -15px hsl(25 30% 15% / 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px -10px hsl(25 30% 15% / 0.1);
   }
 
   .image-cinematic {

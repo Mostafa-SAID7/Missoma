@@ -37,7 +37,7 @@ const EditorialSection = () => {
             imgVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="w-full aspect-square overflow-hidden rounded-2xl shadow-lg">
+          <div className="w-full aspect-[4/5] overflow-hidden rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)]">
             <img
               src={founders}
               alt="Linea founders - two women in minimalist jewelry"

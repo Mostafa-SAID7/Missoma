@@ -17,7 +17,7 @@ const OneThirdTwoThirdsSection = () => {
           }`}
         >
           <Link to="/category/rings" className="block group">
-            <div className="w-full h-[500px] lg:h-[800px] mb-4 overflow-hidden rounded-2xl shadow-md">
+            <div className="w-full h-[400px] lg:h-[600px] mb-4 overflow-hidden rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)]">
               <img
                 src={organicEarring}
                 alt="Artisan crafted jewelry"
@@ -42,7 +42,7 @@ const OneThirdTwoThirdsSection = () => {
           }`}
         >
           <Link to="/category/necklaces" className="block group">
-            <div className="w-full h-[500px] lg:h-[800px] mb-4 overflow-hidden rounded-2xl shadow-md">
+            <div className="w-full h-[400px] lg:h-[600px] mb-4 overflow-hidden rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)]">
               <img
                 src={circularCollection}
                 alt="Circular jewelry collection"
