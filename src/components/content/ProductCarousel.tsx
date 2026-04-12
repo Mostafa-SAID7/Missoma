@@ -36,7 +36,7 @@ const products: Product[] = [
 
 const ProductCard = ({ product, index }: { product: Product; index: number }) => {
   const { addToCart } = useCart();
-  const { ref, isVisible } = useScrollFadeIn(0.1, index * 80);
+  const { ref, isVisible } = useScrollFadeIn(0.1, index * 100);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -53,33 +53,34 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
   return (
     <div
       ref={ref}
-      className={`transition-all duration-500 ease-out ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      className={`transition-all duration-[700ms] ease-out ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
     >
       <Link to={`/product/${product.id}`}>
-        <Card className="border-none shadow-none bg-transparent group transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
+        <Card className="border-none shadow-none bg-transparent group transition-all duration-500 hover-lift">
           <CardContent className="p-0">
-            <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative rounded-lg">
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-all duration-300 group-hover:opacity-0" />
-              <img src={product.category === "Earrings" ? organicEarring : linkBracelet} alt={`${product.name} lifestyle`} className="absolute inset-0 w-full h-full object-cover transition-all duration-300 opacity-0 group-hover:opacity-100" />
-              <div className="absolute inset-0 bg-black/[0.03]"></div>
+            <div className="aspect-square mb-4 overflow-hidden bg-card relative rounded-2xl shadow-sm">
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-all duration-700 group-hover:opacity-0 group-hover:scale-105" />
+              <img src={product.category === "Earrings" ? organicEarring : linkBracelet} alt={`${product.name} lifestyle`} className="absolute inset-0 w-full h-full object-cover transition-all duration-700 opacity-0 group-hover:opacity-100 group-hover:scale-105" />
               {(product.id === 1 || product.id === 3) && (
-                <div className="absolute top-2 left-2 px-2 py-1 text-xs font-medium text-black">NEW</div>
+                <div className="absolute top-3 left-3 px-3 py-1 text-[10px] font-medium tracking-widest uppercase text-foreground bg-background/80 backdrop-blur-sm rounded-full">
+                  New
+                </div>
               )}
               <button
                 onClick={handleAddToCart}
-                className="absolute bottom-2 right-2 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-background text-foreground"
+                className="absolute bottom-3 right-3 p-2.5 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:scale-110 text-foreground shadow-sm"
                 aria-label="Add to bag"
               >
-                <ShoppingBag size={16} />
+                <ShoppingBag size={15} />
               </button>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-light text-foreground">{product.category}</p>
+            <div className="space-y-1 px-1">
+              <p className="text-xs font-light tracking-wider uppercase text-muted-foreground">{product.category}</p>
               <div className="flex justify-between items-center">
                 <h3 className="text-sm font-medium text-foreground">{product.name}</h3>
-                <p className="text-sm font-light text-foreground">{product.price}</p>
+                <p className="text-sm font-light text-muted-foreground">{product.price}</p>
               </div>
             </div>
           </CardContent>
