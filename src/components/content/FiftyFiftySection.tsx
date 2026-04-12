@@ -17,7 +17,7 @@ const FiftyFiftySection = () => {
           }`}
         >
           <Link to="/category/earrings" className="block group">
-            <div className="w-full aspect-square mb-4 overflow-hidden rounded-2xl shadow-md">
+            <div className="w-full aspect-[4/5] mb-4 overflow-hidden rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)]">
               <img
                 src={earringsCollection}
                 alt="Earrings collection"
@@ -42,7 +42,7 @@ const FiftyFiftySection = () => {
           }`}
         >
           <Link to="/category/bracelets" className="block group">
-            <div className="w-full aspect-square mb-4 overflow-hidden rounded-2xl shadow-md">
+            <div className="w-full aspect-[4/5] mb-4 overflow-hidden rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)]">
               <img
                 src={linkBracelet}
                 alt="Chain link bracelet"
