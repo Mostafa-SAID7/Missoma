@@ -58,9 +58,8 @@ const Navigation = () => {
   ];
 
   return (
-    <nav 
-      className="relative" 
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}
+    <nav
+      className="relative bg-nav/90 backdrop-blur-md border-b border-border/60 transition-colors duration-500"
     >
       <div className="flex items-center justify-between h-16 px-6">
         <button
