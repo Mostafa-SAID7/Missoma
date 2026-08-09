@@ -76,7 +76,9 @@
 
     --sidebar: 32 20% 97%;
 
+    --font-display: 'Iceland', Outfit, ui-sans-serif, sans-serif;
     --font-sans: Outfit, ui-sans-serif, system-ui, sans-serif;
+
     --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'Inconsolata', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
