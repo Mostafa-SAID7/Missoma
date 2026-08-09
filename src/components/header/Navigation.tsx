@@ -139,12 +139,13 @@ const Navigation = () => {
                     linkTo = "/about/our-story";
                   }
                   return (
-                    <Link key={index} to={linkTo} className="w-[400px] h-[280px] cursor-pointer group relative overflow-hidden block">
-                      <img src={image.src} alt={image.alt} className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90" />
+                    <Link key={index} to={linkTo} className="w-[360px] h-[240px] cursor-pointer group relative overflow-hidden block rounded-2xl shadow-[0_4px_20px_-8px_hsl(25_30%_15%/0.18)] transition-all duration-500 hover:-translate-y-1">
+                      <img src={image.src} alt={image.alt} className="w-full h-full object-cover rounded-2xl transition-transform duration-700 ease-out group-hover:scale-105" />
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
                       {(activeDropdown === "Shop" || activeDropdown === "New in" || activeDropdown === "About") && (
-                        <div className="absolute bottom-2 left-2 text-white text-xs font-light flex items-center gap-1">
+                        <div className="absolute bottom-3 left-4 text-primary-foreground text-xs font-light tracking-widest uppercase flex items-center gap-1.5">
                           <span>{image.label}</span>
-                          <ArrowRight size={12} />
+                          <ArrowRight size={12} className="transition-transform duration-500 group-hover:translate-x-1" />
                         </div>
                       )}
                     </Link>
