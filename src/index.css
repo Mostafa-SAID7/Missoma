@@ -162,7 +162,50 @@
     font-family: var(--font-display);
     @apply tracking-[0.06em];
   }
+
+  /* Refined cinematic scrollbar */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.45) transparent;
+    scroll-behavior: smooth;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.18);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.55),
+      hsl(var(--primary) / 0.85)
+    );
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.8),
+      hsl(var(--primary))
+    );
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
+
 
 
 /* Cinematic animation utilities */
@@ -194,7 +237,60 @@
     transform: scale(1.04);
     filter: brightness(1.05) contrast(1.02);
   }
+
+  /* Overlay panels (search, menus) sliding open */
+  .panel-reveal {
+    transform-origin: top center;
+    animation: panelReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Staggered children inside a revealed panel */
+  .stagger-in > * {
+    opacity: 0;
+    animation: cinematicFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .stagger-in > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-in > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-in > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-in > *:nth-child(4) { animation-delay: 0.2s; }
+  .stagger-in > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-in > *:nth-child(6) { animation-delay: 0.3s; }
+  .stagger-in > *:nth-child(n + 7) { animation-delay: 0.35s; }
+
+  .backdrop-fade {
+    animation: fadeIn 0.35s ease-out both;
+  }
 }
+
+@keyframes panelReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scaleY(0.98);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 @keyframes cinematicFadeUp {
   from {

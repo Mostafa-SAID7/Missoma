@@ -159,11 +159,11 @@ const Navigation = () => {
 
       {/* Search overlay */}
       {isSearchOpen && (
-        <div className="absolute top-full left-0 right-0 bg-nav border-b border-border z-50">
+        <div className="absolute top-full left-0 right-0 bg-nav/95 backdrop-blur-md border-b border-border rounded-b-3xl shadow-[0_16px_40px_-24px_hsl(25_30%_15%/0.3)] z-50 panel-reveal">
           <div className="px-6 py-8">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto stagger-in">
               <div className="relative mb-8">
-                <div className="flex items-center border-b border-border pb-2">
+                <div className="flex items-center border-b border-border pb-2 transition-colors duration-300 focus-within:border-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-nav-foreground mr-3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                   </svg>
@@ -172,12 +172,13 @@ const Navigation = () => {
               </div>
               <div>
                 <h3 className="text-nav-foreground text-sm font-light mb-4">Popular Searches</h3>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 stagger-in">
                   {popularSearches.map((search, index) => (
-                    <button key={index} className="text-nav-foreground hover:text-nav-hover text-sm font-light py-2 px-4 border border-border rounded-full transition-colors duration-200 hover:border-nav-hover">{search}</button>
+                    <button key={index} className="text-nav-foreground hover:text-nav-hover text-sm font-light py-2 px-4 border border-border rounded-full transition-all duration-300 hover:border-primary hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-10px_hsl(25_30%_15%/0.4)]">{search}</button>
                   ))}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -185,9 +186,10 @@ const Navigation = () => {
 
       {/* Mobile navigation menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-nav border-b border-border z-50">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-nav/95 backdrop-blur-md border-b border-border rounded-b-3xl shadow-[0_16px_40px_-24px_hsl(25_30%_15%/0.3)] z-50 panel-reveal">
           <div className="px-6 py-8">
-            <div className="space-y-6">
+            <div className="space-y-6 stagger-in">
+
               {navItems.map((item) => (
                 <div key={item.name}>
                   <Link to={item.href} className="text-nav-foreground hover:text-nav-hover transition-colors duration-200 text-lg font-light block py-2" onClick={() => setIsMobileMenuOpen(false)}>{item.name}</Link>
@@ -214,8 +216,9 @@ const Navigation = () => {
       {/* Favorites Off-canvas overlay */}
       {offCanvasType === 'favorites' && (
         <div className="fixed inset-0 z-50 h-screen">
-          <div className="absolute inset-0 bg-black/50 h-screen" onClick={() => setOffCanvasType(null)} />
-          <div className="absolute right-0 top-0 h-screen w-96 bg-background border-l border-border animate-slide-in-right flex flex-col">
+          <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm h-screen backdrop-fade" onClick={() => setOffCanvasType(null)} />
+          <div className="absolute right-0 top-0 h-screen w-96 bg-background border-l border-border rounded-l-3xl shadow-[0_0_60px_-20px_hsl(25_30%_15%/0.45)] animate-slide-in-right flex flex-col">
+
             <div className="flex items-center justify-between p-6 border-b border-border">
               <h2 className="text-lg font-light text-foreground">Your Favorites</h2>
               <button onClick={() => setOffCanvasType(null)} className="p-2 text-foreground hover:text-muted-foreground transition-colors" aria-label="Close">
