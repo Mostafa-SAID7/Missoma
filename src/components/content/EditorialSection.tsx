@@ -16,7 +16,7 @@ const EditorialSection = () => {
             textVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-2xl md:text-3xl font-serif font-normal text-foreground leading-tight">
+          <h2 className="text-2xl md:text-3xl font-display font-normal text-foreground leading-tight">
             Jewelry Drawn From Shadows and Lines
           </h2>
           <p className="text-sm font-light text-muted-foreground leading-relaxed">
