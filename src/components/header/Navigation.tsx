@@ -2,6 +2,7 @@ import { ArrowRight, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ShoppingBag from "./ShoppingBag";
+import ThemeToggle from "./ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
 
 const Navigation = () => {
@@ -58,9 +59,8 @@ const Navigation = () => {
   ];
 
   return (
-    <nav 
-      className="relative" 
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}
+    <nav
+      className="relative bg-nav/90 backdrop-blur-md border-b border-border/60 transition-colors duration-500"
     >
       <div className="flex items-center justify-between h-16 px-6">
         <button
@@ -90,6 +90,7 @@ const Navigation = () => {
         </div>
 
         <div className="flex items-center space-x-2">
+          <ThemeToggle />
           <button className="p-2 text-nav-foreground hover:text-nav-hover transition-colors duration-200" aria-label="Search" onClick={() => setIsSearchOpen(!isSearchOpen)}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -105,7 +106,7 @@ const Navigation = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
             {totalItems > 0 && (
-              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[30%] text-[0.5rem] font-semibold text-black pointer-events-none">{totalItems}</span>
+              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[30%] text-[0.5rem] font-semibold text-nav-foreground pointer-events-none">{totalItems}</span>
             )}
           </button>
         </div>
@@ -113,7 +114,7 @@ const Navigation = () => {
 
       {/* Full width dropdown */}
       {activeDropdown && (
-        <div className="absolute top-full left-0 right-0 bg-nav border-b border-border z-50" onMouseEnter={() => setActiveDropdown(activeDropdown)} onMouseLeave={() => setActiveDropdown(null)}>
+        <div className="absolute top-full left-0 right-0 bg-nav/95 backdrop-blur-md border-b border-border rounded-b-3xl shadow-[0_16px_40px_-24px_hsl(25_30%_15%/0.3)] z-50 cinematic-fade-up" onMouseEnter={() => setActiveDropdown(activeDropdown)} onMouseLeave={() => setActiveDropdown(null)}>
           <div className="px-6 py-8">
             <div className="flex justify-between w-full">
               <div className="flex-1">
@@ -138,12 +139,13 @@ const Navigation = () => {
                     linkTo = "/about/our-story";
                   }
                   return (
-                    <Link key={index} to={linkTo} className="w-[400px] h-[280px] cursor-pointer group relative overflow-hidden block">
-                      <img src={image.src} alt={image.alt} className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90" />
+                    <Link key={index} to={linkTo} className="w-[360px] h-[240px] cursor-pointer group relative overflow-hidden block rounded-2xl shadow-[0_4px_20px_-8px_hsl(25_30%_15%/0.18)] transition-all duration-500 hover:-translate-y-1">
+                      <img src={image.src} alt={image.alt} className="w-full h-full object-cover rounded-2xl transition-transform duration-700 ease-out group-hover:scale-105" />
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
                       {(activeDropdown === "Shop" || activeDropdown === "New in" || activeDropdown === "About") && (
-                        <div className="absolute bottom-2 left-2 text-white text-xs font-light flex items-center gap-1">
+                        <div className="absolute bottom-3 left-4 text-primary-foreground text-xs font-light tracking-widest uppercase flex items-center gap-1.5">
                           <span>{image.label}</span>
-                          <ArrowRight size={12} />
+                          <ArrowRight size={12} className="transition-transform duration-500 group-hover:translate-x-1" />
                         </div>
                       )}
                     </Link>
