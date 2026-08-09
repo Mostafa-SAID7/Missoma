@@ -24,7 +24,14 @@ export default {
   				'Segoe UI Symbol',
   				'Noto Color Emoji'
   			],
+  			display: [
+  				'Iceland',
+  				'Outfit',
+  				'ui-sans-serif',
+  				'sans-serif'
+  			],
   			serif: [
+
   				'Lora',
   				'ui-serif',
   				'Georgia',
