@@ -31,12 +31,13 @@ const ShoppingBag = ({ isOpen, onClose, cartItems, updateQuantity, onViewFavorit
     <div className="fixed inset-0 z-50 h-screen">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/50 h-screen"
+        className="absolute inset-0 bg-foreground/40 backdrop-blur-sm h-screen backdrop-fade"
         onClick={onClose}
       />
       
       {/* Off-canvas panel */}
-      <div className="absolute right-0 top-0 h-screen w-96 bg-background border-l border-border animate-slide-in-right flex flex-col">
+      <div className="absolute right-0 top-0 h-screen w-96 bg-background border-l border-border rounded-l-3xl shadow-[0_0_60px_-20px_hsl(25_30%_15%/0.45)] animate-slide-in-right flex flex-col">
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-lg font-light text-foreground">Shopping Bag</h2>
