@@ -157,7 +157,13 @@
   body {
     @apply bg-background text-foreground font-light tracking-wide;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply tracking-[0.06em];
+  }
 }
+
 
 /* Cinematic animation utilities */
 @layer utilities {
