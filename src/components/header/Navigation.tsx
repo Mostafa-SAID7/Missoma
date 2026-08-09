@@ -186,9 +186,10 @@ const Navigation = () => {
 
       {/* Mobile navigation menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-nav border-b border-border z-50">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-nav/95 backdrop-blur-md border-b border-border rounded-b-3xl shadow-[0_16px_40px_-24px_hsl(25_30%_15%/0.3)] z-50 panel-reveal">
           <div className="px-6 py-8">
-            <div className="space-y-6">
+            <div className="space-y-6 stagger-in">
+
               {navItems.map((item) => (
                 <div key={item.name}>
                   <Link to={item.href} className="text-nav-foreground hover:text-nav-hover transition-colors duration-200 text-lg font-light block py-2" onClick={() => setIsMobileMenuOpen(false)}>{item.name}</Link>
