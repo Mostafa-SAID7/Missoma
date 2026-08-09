@@ -114,7 +114,7 @@ const Navigation = () => {
 
       {/* Full width dropdown */}
       {activeDropdown && (
-        <div className="absolute top-full left-0 right-0 bg-nav border-b border-border z-50" onMouseEnter={() => setActiveDropdown(activeDropdown)} onMouseLeave={() => setActiveDropdown(null)}>
+        <div className="absolute top-full left-0 right-0 bg-nav/95 backdrop-blur-md border-b border-border rounded-b-3xl shadow-[0_16px_40px_-24px_hsl(25_30%_15%/0.3)] z-50 cinematic-fade-up" onMouseEnter={() => setActiveDropdown(activeDropdown)} onMouseLeave={() => setActiveDropdown(null)}>
           <div className="px-6 py-8">
             <div className="flex justify-between w-full">
               <div className="flex-1">
