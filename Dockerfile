@@ -1,21 +1,4 @@
-# Build stage
-FROM node:24-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --prefer-offline --no-audit
-
-# Copy source code
-COPY . .
-
-# Build the application
-RUN npm run build
-
-# Production stage
+# Production stage - serves pre-built application
 FROM node:24-alpine
 
 WORKDIR /app
@@ -23,8 +6,11 @@ WORKDIR /app
 # Install serve to run the production build
 RUN npm install -g serve
 
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+# Copy pre-built application (dist folder must be committed to git)
+COPY dist ./dist
+
+# Copy package.json for reference
+COPY package.json .
 
 # Expose port
 EXPOSE 4545
