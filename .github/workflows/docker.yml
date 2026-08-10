@@ -9,8 +9,10 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: docker.io
+  REGISTRY_DOCKER: docker.io
+  REGISTRY_GHCR: ghcr.io
   IMAGE_NAME: msaid356/linea-jewelry
+  GHCR_IMAGE_NAME: linea-jewelry
 
 jobs:
   build:
@@ -33,11 +35,21 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY_GHCR }}/${{ github.repository_owner }}/${{ env.GHCR_IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -109,7 +121,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.IMAGE_NAME }}:latest
+          image-ref: ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME }}:main
           format: 'sarif'
           output: 'trivy-results.sarif'
         continue-on-error: true
@@ -131,5 +143,12 @@ jobs:
       - name: Report Docker build status
         run: |
           echo "✅ Docker image built successfully"
-          echo "📦 Image: ${{ env.IMAGE_NAME }}:main"
-          echo "🚀 Run with: docker run -p 4545:4545 ${{ env.IMAGE_NAME }}:main"
+          echo ""
+          echo "📦 Published to:"
+          echo "  • Docker Hub: ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME }}"
+          echo "  • GitHub Packages: ${{ env.REGISTRY_GHCR }}/${{ github.repository_owner }}/${{ env.GHCR_IMAGE_NAME }}"
+          echo ""
+          echo "🚀 Run with:"
+          echo "  docker run -p 4545:4545 ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME }}:main"
+          echo "  or"
+          echo "  docker run -p 4545:4545 ${{ env.REGISTRY_GHCR }}/${{ github.repository_owner }}/${{ env.GHCR_IMAGE_NAME }}:main"
