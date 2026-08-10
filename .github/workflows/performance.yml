@@ -68,6 +68,8 @@ jobs:
             .lighthouseci/
             dist/manifest.json
         continue-on-error: true
+
+      - name: Comment PR with Lighthouse results
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
