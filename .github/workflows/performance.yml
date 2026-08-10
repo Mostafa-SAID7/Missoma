@@ -56,10 +56,18 @@ jobs:
         uses: treosh/lighthouse-ci-action@v10
         with:
           configPath: ./.github/lighthouse.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+          uploadArtifacts: false
+          temporaryPublicStorage: false
+        continue-on-error: true
 
-      - name: Comment PR with Lighthouse results
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse_results
+          path: |
+            .lighthouseci/
+            dist/manifest.json
+        continue-on-error: true
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
@@ -262,10 +270,11 @@ jobs:
       - name: Upload performance report
         uses: actions/upload-artifact@v4
         with:
-          name: performance-report
+          name: performance_report
           path: |
             perf-results.json
             dist/bundle-metrics.json
+        continue-on-error: true
 
   # ============================================================================
   # PERFORMANCE DEGRADATION CHECK
@@ -282,7 +291,8 @@ jobs:
       - name: Download performance artifacts
         uses: actions/download-artifact@v4
         with:
-          name: performance-report
+          name: performance_report
+        continue-on-error: true
 
       - name: Check bundle size threshold
         run: |

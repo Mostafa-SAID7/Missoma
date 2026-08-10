@@ -136,7 +136,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright_report
           path: playwright-report/
           retention-days: 30
 
@@ -331,7 +331,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshot-report
+          name: screenshot_report
           path: |
             screenshot-report.md
             tests/screenshots/current/
