@@ -145,10 +145,15 @@ jobs:
         id: deploy-preview
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
-            echo "❌ VERCEL_TOKEN is not set"
+            echo "❌ VERCEL_TOKEN is not set in GitHub secrets"
             exit 1
           fi
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token "$VERCEL_TOKEN" --confirm)
+          echo "Deploying to Vercel preview..."
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token "$VERCEL_TOKEN" --yes 2>&1) || {
+            echo "❌ Deployment failed. Check token validity and Vercel project setup"
+            echo "Token validation hint: Token should be from https://vercel.com/account/tokens"
+            exit 1
+          }
           echo "preview-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Preview deployment: $DEPLOYMENT_URL"
         env:
@@ -159,10 +164,15 @@ jobs:
         id: deploy-prod
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
-            echo "❌ VERCEL_TOKEN is not set"
+            echo "❌ VERCEL_TOKEN is not set in GitHub secrets"
             exit 1
           fi
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN" --confirm)
+          echo "Deploying to Vercel production..."
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN" --yes 2>&1) || {
+            echo "❌ Deployment failed. Check token validity and Vercel project setup"
+            echo "Token validation hint: Token should be from https://vercel.com/account/tokens"
+            exit 1
+          }
           echo "production-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Production deployment: $DEPLOYMENT_URL"
         env:
@@ -173,10 +183,15 @@ jobs:
         id: deploy-staging
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
-            echo "❌ VERCEL_TOKEN is not set"
+            echo "❌ VERCEL_TOKEN is not set in GitHub secrets"
             exit 1
           fi
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token "$VERCEL_TOKEN" --confirm)
+          echo "Deploying to Vercel staging..."
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token "$VERCEL_TOKEN" --yes 2>&1) || {
+            echo "❌ Deployment failed. Check token validity and Vercel project setup"
+            echo "Token validation hint: Token should be from https://vercel.com/account/tokens"
+            exit 1
+          }
           echo "staging-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Staging deployment: $DEPLOYMENT_URL"
         env:
