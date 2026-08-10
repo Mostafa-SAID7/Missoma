@@ -1,0 +1,185 @@
+name: Git Flow CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'release/**'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # Lint and Type Check
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint & Type Check
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: false
+
+  # Build
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # Security Audit
+  security:
+    runs-on: ubuntu-latest
+    name: Security Audit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  # Create Release (on main branch)
+  release:
+    runs-on: ubuntu-latest
+    name: Create Release
+    needs: [lint, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Get version from package.json
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.package-version.outputs.version }}
+          release_name: Release v${{ steps.package-version.outputs.version }}
+          draft: false
+          prerelease: false
+          body: |
+            ## Changes
+            
+            See commit history for details:
+            ${{ github.server_url }}/${{ github.repository }}/commits/${{ github.ref }}
+
+  # Notify on Release Branch
+  release-notification:
+    runs-on: ubuntu-latest
+    name: Release Notification
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    steps:
+      - name: Extract release version
+        id: release
+        run: |
+          BRANCH=${{ github.ref }}
+          VERSION=${BRANCH#refs/heads/release/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Notify release
+        run: echo "🚀 Release v${{ steps.release.outputs.version }} ready for final review"
+
+  # Hotfix Priority Check
+  hotfix-check:
+    runs-on: ubuntu-latest
+    name: Hotfix Priority Check
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/hotfix/')
+    needs: [lint, build, security]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract hotfix version
+        id: hotfix
+        run: |
+          BRANCH=${{ github.ref }}
+          VERSION=${BRANCH#refs/heads/hotfix/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Hotfix Priority Alert
+        run: echo "🔴 HOTFIX ALERT: v${{ steps.hotfix.outputs.version }} - Priority deployment required"
+
+  # Pull Request Checks
+  pr-checks:
+    runs-on: ubuntu-latest
+    name: PR Validation
+    if: github.event_name == 'pull_request'
+    needs: [lint, build, security]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate branch name
+        run: |
+          BRANCH=${{ github.head_ref }}
+          if [[ ! $BRANCH =~ ^(feature|bugfix|release|hotfix|support)/ ]]; then
+            echo "❌ Branch name must follow format: feature/*, bugfix/*, release/*, hotfix/*, or support/*"
+            exit 1
+          fi
+          echo "✅ Branch name valid: $BRANCH"
+
+      - name: Validate PR title format
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          if [[ ! $TITLE =~ ^(feat|fix|docs|style|refactor|perf|test|chore)\: ]]; then
+            echo "❌ PR title must start with: feat:, fix:, docs:, style:, refactor:, perf:, test:, or chore:"
+            exit 1
+          fi
+          echo "✅ PR title valid: $TITLE"
+
+      - name: Summary
+        run: echo "✅ All PR checks passed! Ready for review."
