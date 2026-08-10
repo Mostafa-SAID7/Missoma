@@ -10,6 +10,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Category from "./pages/Category";
 import ProductDetail from "./pages/ProductDetail";
+import Search from "./pages/Search";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import OurStory from "./pages/about/OurStory";
@@ -35,6 +36,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/category/:category" element={<Category />} />
+              <Route path="/search/:query" element={<Search />} />
               <Route path="/product/:productId" element={<ProductDetail />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/about/our-story" element={<OurStory />} />

@@ -1,6 +1,6 @@
 import { ArrowRight, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ShoppingBag from "./ShoppingBag";
 import ThemeToggle from "./ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
@@ -10,6 +10,8 @@ const Navigation = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [offCanvasType, setOffCanvasType] = useState<'favorites' | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const navigate = useNavigate();
   
   const { cartItems, updateQuantity, totalItems, isShoppingBagOpen, setIsShoppingBagOpen } = useCart();
 
@@ -162,19 +164,43 @@ const Navigation = () => {
         <div className="absolute top-full left-0 right-0 bg-nav/95 backdrop-blur-md border-b border-border rounded-b-3xl shadow-[0_16px_40px_-24px_hsl(25_30%_15%/0.3)] z-50 panel-reveal">
           <div className="px-6 py-8">
             <div className="max-w-2xl mx-auto stagger-in">
-              <div className="relative mb-8">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (searchInput.trim()) {
+                  navigate(`/search/${encodeURIComponent(searchInput.trim())}`);
+                  setIsSearchOpen(false);
+                  setSearchInput("");
+                }
+              }} className="relative mb-8">
                 <div className="flex items-center border-b border-border pb-2 transition-colors duration-300 focus-within:border-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-nav-foreground mr-3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                   </svg>
-                  <input type="text" placeholder="Search for jewelry..." className="flex-1 bg-transparent text-nav-foreground placeholder:text-nav-foreground/75 outline-none text-lg" autoFocus />
+                  <input 
+                    type="text" 
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Search for jewelry..." 
+                    className="flex-1 bg-transparent text-nav-foreground placeholder:text-nav-foreground/75 outline-none text-lg" 
+                    autoFocus 
+                  />
                 </div>
-              </div>
+              </form>
               <div>
                 <h3 className="text-nav-foreground text-sm font-light mb-4">Popular Searches</h3>
                 <div className="flex flex-wrap gap-3 stagger-in">
                   {popularSearches.map((search, index) => (
-                    <button key={index} className="text-nav-foreground hover:text-nav-hover text-sm font-light py-2 px-4 border border-border rounded-full transition-all duration-300 hover:border-primary hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-10px_hsl(25_30%_15%/0.4)]">{search}</button>
+                    <button 
+                      key={index} 
+                      onClick={() => {
+                        navigate(`/search/${encodeURIComponent(search)}`);
+                        setIsSearchOpen(false);
+                        setSearchInput("");
+                      }}
+                      className="text-nav-foreground hover:text-nav-hover text-sm font-light py-2 px-4 border border-border rounded-full transition-all duration-300 hover:border-primary hover:-translate-y-0.5 hover:shadow-[0_6px_16px_-10px_hsl(25_30%_15%/0.4)]"
+                    >
+                      {search}
+                    </button>
                   ))}
                 </div>
               </div>
