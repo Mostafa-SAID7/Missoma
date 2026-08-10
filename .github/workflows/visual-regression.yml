@@ -63,7 +63,7 @@ jobs:
             viewports.forEach(viewport => {
               test(`${page.name} - ${viewport.name}`, async ({ page }) => {
                 page.setViewportSize({ width: viewport.width, height: viewport.height });
-                await page.goto(`http://localhost:8081${page.path}`, { waitUntil: 'networkidle' });
+                await page.goto(`http://localhost:4173${page.path}`, { waitUntil: 'networkidle' });
                 
                 // Wait for animations to complete
                 await page.waitForTimeout(500);
@@ -107,10 +107,24 @@ jobs:
           });
           EOF
 
-      - name: Start dev server
+      - name: Start preview server
         run: |
-          npm run dev &
+          npm run preview > /tmp/vite-preview.log 2>&1 &
           sleep 3
+          echo "Preview server started (PID: $!)"
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:4173/ > /dev/null 2>&1; then
+              echo "✅ Server is ready"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Server failed to start"
+          exit 1
 
       - name: Run Playwright visual tests
         id: playwright

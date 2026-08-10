@@ -55,6 +55,24 @@ jobs:
       - name: Install axe-core
         run: npm install --save-dev @axe-core/playwright
 
+      - name: Start preview server
+        run: |
+          npm run preview > /tmp/vite-preview.log 2>&1 &
+          sleep 3
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:4173/ > /dev/null 2>&1; then
+              echo "✅ Server is ready"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Server failed to start"
+          exit 1
+
       - name: Run axe accessibility audit on ${{ matrix.page.name }}
         id: axe-audit
         run: |
@@ -66,7 +84,7 @@ jobs:
           (async () => {
             const browser = await chromium.launch();
             const page = await browser.newPage();
-            const baseUrl = 'http://localhost:8081';
+            const baseUrl = 'http://localhost:4173';
             const testUrl = process.env.TEST_URL;
             
             console.log(`🔍 Testing: ${testUrl}`);
@@ -191,11 +209,11 @@ jobs:
               "args": ["--no-sandbox"]
             },
             "urls": [
-              "http://localhost:8081/",
-              "http://localhost:8081/category/Earrings",
-              "http://localhost:8081/product/pantheon",
-              "http://localhost:8081/search/test",
-              "http://localhost:8081/checkout"
+              "http://localhost:4173/",
+              "http://localhost:4173/category/Earrings",
+              "http://localhost:4173/product/pantheon",
+              "http://localhost:4173/search/test",
+              "http://localhost:4173/checkout"
             ]
           }
           EOF

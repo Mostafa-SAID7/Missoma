@@ -31,15 +31,16 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Start dev server
-        run: npm run dev &
-        env:
-          NODE_ENV: production
+      - name: Start preview server
+        run: |
+          npm run preview > /tmp/vite-preview.log 2>&1 &
+          sleep 3
+          echo "Preview server started (PID: $!)"
 
       - name: Wait for server
         run: |
           for i in {1..30}; do
-            if curl -f http://localhost:8081/ > /dev/null 2>&1; then
+            if curl -f http://localhost:4173/ > /dev/null 2>&1; then
               echo "✅ Server is ready"
               exit 0
             fi
@@ -47,6 +48,8 @@ jobs:
             sleep 2
           done
           echo "❌ Server failed to start"
+          echo "--- Server logs ---"
+          cat /tmp/vite-preview.log || echo "No logs available"
           exit 1
 
       - name: Run Lighthouse audit
@@ -216,17 +219,17 @@ jobs:
             
             // Home page
             const startHome = Date.now();
-            await page.goto('http://localhost:8081/', { waitUntil: 'networkidle2' });
+            await page.goto('http://localhost:4173/', { waitUntil: 'networkidle2' });
             metrics.homePageLoadTime = Date.now() - startHome;
             
             // Product page
             const startProduct = Date.now();
-            await page.goto('http://localhost:8081/product/pantheon', { waitUntil: 'networkidle2' });
+            await page.goto('http://localhost:4173/product/pantheon', { waitUntil: 'networkidle2' });
             metrics.productPageLoadTime = Date.now() - startProduct;
             
             // Category page
             const startCategory = Date.now();
-            await page.goto('http://localhost:8081/category/Earrings', { waitUntil: 'networkidle2' });
+            await page.goto('http://localhost:4173/category/Earrings', { waitUntil: 'networkidle2' });
             metrics.categoryPageLoadTime = Date.now() - startCategory;
             
             // Get Core Web Vitals
