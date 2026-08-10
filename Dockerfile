@@ -3,11 +3,14 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
+# Increase npm timeout
+RUN npm config set fetch-timeout 120000
+
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
 # Copy source code
 COPY . .
