@@ -199,7 +199,7 @@ jobs:
         run: npm run build
 
       - name: Install performance testing tools
-        run: npm install --save-dev @puppeteer/extra puppeteer
+        run: npm install --save-dev puppeteer
 
       - name: Run performance tests
         id: perf-test
