@@ -2,38 +2,28 @@
 
 This guide explains how to use the Docker image for the Linea Jewelry e-commerce application.
 
-## 📦 Available Packages
+## 📦 Package Location
 
-Your Docker image is published to two registries:
+Your Docker image is published to **GitHub Container Registry (Packages)**.
 
-### 1. **Docker Hub**
+Pull the image:
 ```bash
-docker pull msaid356/linea-jewelry:main
-```
-
-### 2. **GitHub Container Registry (Packages)**
-```bash
-docker pull ghcr.io/Mostafa-SAID7/linea-jewelry:main
+docker pull ghcr.io/mostafa-said7/linea-jewelry:main
 ```
 
 ## 🚀 Quick Start
 
-### Run with Docker Hub image:
+Run the container:
 ```bash
-docker run -p 4545:4545 msaid356/linea-jewelry:main
+docker run -p 4545:4545 ghcr.io/mostafa-said7/linea-jewelry:main
 ```
 
 Then open: **http://localhost:4545**
 
-### Run with GitHub Packages image:
-```bash
-docker run -p 4545:4545 ghcr.io/Mostafa-SAID7/linea-jewelry:main
-```
-
 ## 📋 Available Tags
 
-- `main` - Latest from main branch
-- `v*` - Semantic version tags (e.g., v0.0.15)
+- `main` - Latest from main branch ✅
+- `v*` - Semantic version tags (e.g., v0.0.17, v0.0.18, etc.)
 - `sha-*` - Specific commit SHA
 
 ## 🐳 Docker Compose
@@ -64,6 +54,8 @@ docker logs -f linea-jewelry
 
 ## 📊 Image Details
 
+- **Registry**: GitHub Container Registry (ghcr.io)
+- **Image**: `ghcr.io/mostafa-said7/linea-jewelry`
 - **Base Image**: Node.js 24-Alpine
 - **Port**: 4545 (production)
 - **Size**: ~81 MB compressed / ~299 MB uncompressed
@@ -72,9 +64,9 @@ docker logs -f linea-jewelry
 ## 🔄 Automatic Publishing
 
 Docker images are automatically built and pushed on:
-- Push to `main` branch
-- Any git tag (`v*`)
-- Manual trigger via GitHub Actions
+- ✅ Push to `main` branch
+- ✅ Any git tag (`v*`)
+- ✅ Manual trigger via GitHub Actions (workflow_dispatch)
 
 ## 🛠 Build Locally
 
@@ -94,6 +86,7 @@ The app requires a pre-built `dist/` folder. Build locally first:
 npm install
 npm run build
 docker build -t linea-jewelry .
+docker run -p 4545:4545 linea-jewelry
 ```
 
 ## 📲 Container Ports
@@ -113,19 +106,17 @@ docker inspect --format='{{.State.Health.Status}}' linea-jewelry
 ## 🚨 Troubleshooting
 
 ### Image not found?
-Make sure you're pulling from the correct registry:
+Make sure you're using the correct registry:
 ```bash
-# List available tags
-docker search msaid356/linea-jewelry
-# or
-docker pull ghcr.io/Mostafa-SAID7/linea-jewelry --dry-run
+docker pull ghcr.io/mostafa-said7/linea-jewelry:main
 ```
 
 ### Port already in use?
 Use a different port:
 ```bash
-docker run -p 3000:4545 msaid356/linea-jewelry:main
+docker run -p 3000:4545 ghcr.io/mostafa-said7/linea-jewelry:main
 ```
+# App will be on http://localhost:3000
 
 ### Container exits immediately?
 Check logs:
@@ -133,7 +124,15 @@ Check logs:
 docker logs <container-id>
 ```
 
+### Authentication error?
+GitHub Packages requires authentication. For public images, use:
+```bash
+docker login ghcr.io
+# Enter your GitHub username and personal access token (if needed)
+```
+
 ---
 
 **Published by**: GitHub Actions Docker Build & Push workflow  
+**Registry**: GitHub Container Registry (ghcr.io)  
 **Last Updated**: August 2026
