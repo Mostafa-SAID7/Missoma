@@ -271,8 +271,20 @@ jobs:
           EOF
           
           npm install --save-dev puppeteer
-          npm run dev &
+          npm run build
+          npm run preview > /tmp/vite-preview.log 2>&1 &
           sleep 3
+          
+          # Wait for server to be ready
+          for i in {1..30}; do
+            if curl -f http://localhost:4173/ > /dev/null 2>&1; then
+              echo "✅ Server is ready"
+              break
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 1
+          done
+          
           node capture-screenshots.js
 
       - name: Download baseline screenshots
