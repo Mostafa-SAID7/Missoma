@@ -144,8 +144,8 @@ jobs:
     steps:
       - name: Validate branch name
         run: |
-          BRANCH=${{ github.head_ref }}
-          if [[ ! $BRANCH =~ ^(feature|bugfix|release|hotfix|support)/ ]]; then
+          BRANCH="${{ github.head_ref }}"
+          if [[ ! "$BRANCH" =~ ^(feature|bugfix|release|hotfix|support)/ ]]; then
             echo "❌ Invalid branch name: $BRANCH"
             echo "Must follow format: feature/*, bugfix/*, release/*, hotfix/*, or support/*"
             exit 1
@@ -155,7 +155,7 @@ jobs:
       - name: Validate PR title format
         run: |
           TITLE="${{ github.event.pull_request.title }}"
-          if [[ ! $TITLE =~ ^(feat|fix|docs|style|refactor|perf|test|chore)\: ]]; then
+          if [[ ! "$TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|chore):\  ]]; then
             echo "❌ Invalid PR title: $TITLE"
             echo "Must start with: feat:, fix:, docs:, style:, refactor:, perf:, test:, or chore:"
             exit 1
@@ -208,7 +208,7 @@ jobs:
     name: Release Branch Ready
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'push' && needs.validate.outputs.is-release == 'true'
+    if: github.event_name == 'push' && contains(github.ref, 'release/')
     
     steps:
       - name: Notify release ready
@@ -216,7 +216,7 @@ jobs:
           VERSION="${{ needs.validate.outputs.version }}"
           echo "🚀 Release v$VERSION ready for final review"
           echo "• All validation checks passed"
-          echo "• Branch: release/$VERSION"
+          echo "• Branch: ${{ github.ref }}"
           echo "• Next: Merge to main for production release"
 
   # ============================================================================
@@ -227,7 +227,7 @@ jobs:
     name: Hotfix Priority Alert
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'push' && needs.validate.outputs.is-hotfix == 'true'
+    if: github.event_name == 'push' && contains(github.ref, 'hotfix/')
     
     steps:
       - name: Send hotfix alert
@@ -247,7 +247,7 @@ jobs:
   status:
     name: Workflow Status
     runs-on: ubuntu-latest
-    needs: [validate, validate-pr]
+    needs: [validate]
     if: always()
     
     steps:
