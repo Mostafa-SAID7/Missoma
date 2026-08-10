@@ -8,31 +8,13 @@ import { Link } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useScrollFadeIn } from "@/hooks/useScrollFadeIn";
-import pantheonImage from "@/assets/pantheon.jpg";
-import eclipseImage from "@/assets/eclipse.jpg";
-import haloImage from "@/assets/halo.jpg";
-import obliqueImage from "@/assets/oblique.jpg";
-import lintelImage from "@/assets/lintel.jpg";
-import shadowlineImage from "@/assets/shadowline.jpg";
+import { products } from "@/data/products";
+import { Product } from "@/types";
 import organicEarring from "@/assets/organic-earring.png";
 import linkBracelet from "@/assets/link-bracelet.png";
 
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  price: string;
-  image: string;
-}
-
-const products: Product[] = [
-  { id: 1, name: "Pantheon", category: "Earrings", price: "€2,850", image: pantheonImage },
-  { id: 2, name: "Eclipse", category: "Bracelets", price: "€3,200", image: eclipseImage },
-  { id: 3, name: "Halo", category: "Earrings", price: "€1,950", image: haloImage },
-  { id: 4, name: "Oblique", category: "Earrings", price: "€1,650", image: obliqueImage },
-  { id: 5, name: "Lintel", category: "Earrings", price: "€2,250", image: lintelImage },
-  { id: 6, name: "Shadowline", category: "Bracelets", price: "€3,950", image: shadowlineImage },
-];
+// Use first 6 products for carousel
+const carouselProducts = products.slice(0, 6);
 
 const ProductCard = ({ product, index }: { product: Product; index: number }) => {
   const { addToCart } = useCart();
@@ -95,7 +77,7 @@ const ProductCarousel = () => {
     <section className="w-full mb-16 px-6">
       <Carousel opts={{ align: "start", loop: false }} className="w-full">
         <CarouselContent className="gap-4 md:gap-6">
-          {products.map((product, index) => (
+          {carouselProducts.map((product, index) => (
             <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4 pl-0">
               <ProductCard product={product} index={index} />
             </CarouselItem>

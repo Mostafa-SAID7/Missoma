@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import pantheonImage from "@/assets/pantheon.jpg";
-import eclipseImage from "@/assets/eclipse.jpg";
+import { getProductById } from "@/data/products";
 
 const Checkout = () => {
   const [showDiscountInput, setShowDiscountInput] = useState(false);
@@ -46,14 +45,17 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
   
-  // Mock cart data - in a real app this would come from state management
+  // Mock cart data - get from products data
+  const product1 = getProductById(1);
+  const product2 = getProductById(2);
+  
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
       name: "Pantheon Ring",
       price: "€2,450",
       quantity: 1,
-      image: pantheonImage,
+      image: product1?.image,
       size: "54 EU / 7 US"
     },
     {
@@ -61,7 +63,7 @@ const Checkout = () => {
       name: "Eclipse Earrings", 
       price: "€1,850",
       quantity: 1,
-      image: eclipseImage
+      image: product2?.image
     }
   ]);
 

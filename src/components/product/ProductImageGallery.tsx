@@ -1,18 +1,10 @@
 import { useState, useRef } from "react";
 import ImageZoom from "./ImageZoom";
-import pantheonImage from "@/assets/pantheon.jpg";
-import eclipseImage from "@/assets/eclipse.jpg";
-import haloImage from "@/assets/halo.jpg";
+import { products } from "@/data/products";
 import organicEarring from "@/assets/organic-earring.png";
 import linkBracelet from "@/assets/link-bracelet.png";
 
-const productImages = [
-  pantheonImage,
-  organicEarring,
-  eclipseImage,
-  linkBracelet,
-  haloImage,
-];
+const productImages = products.slice(0, 5).flatMap(p => [p.image, p.category === "Earrings" ? organicEarring : linkBracelet]);
 
 const ProductImageGallery = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

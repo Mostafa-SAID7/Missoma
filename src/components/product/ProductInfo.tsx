@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import pantheonImage from "@/assets/pantheon.jpg";
+import { getProductById } from "@/data/products";
 
 const ProductInfo = () => {
   const [quantity, setQuantity] = useState(1);
@@ -17,16 +17,19 @@ const ProductInfo = () => {
   const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart({
-        id: 1,
-        name: "Pantheon",
-        price: "€2,850",
-        image: pantheonImage,
-        category: "Earrings",
-      });
+    const product = getProductById(1);
+    if (product) {
+      for (let i = 0; i < quantity; i++) {
+        addToCart({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          category: product.category,
+        });
+      }
+      setQuantity(1);
     }
-    setQuantity(1);
   };
 
   return (
