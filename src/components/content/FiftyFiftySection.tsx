@@ -35,7 +35,7 @@ const FiftyFiftySection = () => {
       setActiveIndex((prev) => (prev + 1) % heroItems.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroItems.length]);
 
   const goToPrevious = () => {
     setActiveIndex((prev) => (prev - 1 + heroItems.length) % heroItems.length);
