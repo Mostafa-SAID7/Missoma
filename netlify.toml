@@ -1,0 +1,133 @@
+# Netlify Configuration File
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+# ============================================================================
+# BUILD CONFIGURATION
+# ============================================================================
+
+[build]
+  # Build command
+  command = "npm run build"
+  
+  # Publish directory (where built files are)
+  publish = "dist"
+  
+  # Node version to use
+  node_build_version = "20"
+  
+  # Functions directory (if using Netlify Functions)
+  functions = "netlify/functions"
+  
+  # Environment variables for build
+  environment = { NODE_ENV = "production" }
+
+# ============================================================================
+# DEVELOPMENT CONFIGURATION
+# ============================================================================
+
+[dev]
+  # Local dev server port
+  port = 3000
+  
+  # Command to run dev server
+  command = "npm run dev"
+  
+  # Publish directory in dev mode
+  publish = "dist"
+
+# ============================================================================
+# REDIRECT RULES (For SPA Routing)
+# ============================================================================
+
+# Redirect all non-file requests to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Redirect HTTP to HTTPS
+[[redirects]]
+  from = "http://:project.netlify.app/*"
+  to = "https://:project.netlify.app/:splat"
+  status = 301
+  force = true
+
+# ============================================================================
+# HEADERS CONFIGURATION
+# ============================================================================
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    "X-Frame-Options" = "SAMEORIGIN"
+    "X-Content-Type-Options" = "nosniff"
+    "X-XSS-Protection" = "1; mode=block"
+    "Referrer-Policy" = "strict-origin-when-cross-origin"
+    
+    # Performance headers
+    "Cache-Control" = "public, max-age=3600, must-revalidate"
+    
+    # CSP (Content Security Policy)
+    "Content-Security-Policy" = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+
+# Cache busting for JS/CSS
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    "Cache-Control" = "public, max-age=31536000, immutable"
+
+# Don't cache HTML
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    "Cache-Control" = "public, max-age=0, must-revalidate"
+
+# ============================================================================
+# CONTEXT-SPECIFIC CONFIGURATION
+# ============================================================================
+
+# Production context
+[context.production]
+  command = "npm run build"
+  publish = "dist"
+  environment = { NODE_ENV = "production" }
+
+# Deploy preview context (PRs)
+[context.deploy-preview]
+  command = "npm run build"
+  publish = "dist"
+  environment = { NODE_ENV = "production" }
+
+# Branch deploy context
+[context.branch-deploy]
+  command = "npm run build"
+  publish = "dist"
+  environment = { NODE_ENV = "production" }
+
+# Development context
+[context.dev]
+  command = "npm run dev"
+  environment = { NODE_ENV = "development" }
+
+# ============================================================================
+# EDGE FUNCTIONS (Optional)
+# ============================================================================
+
+# [[edge_functions]]
+#   path = "/api/*"
+#   function = "api-handler"
+
+# ============================================================================
+# PLUGINS (Optional)
+# ============================================================================
+
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
+
+# ============================================================================
+# MONITORING (Optional)
+# ============================================================================
+
+# [telemetry]
+#   enabled = true

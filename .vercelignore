@@ -1,0 +1,64 @@
+# Vercel Build Ignore File
+# Files/folders listed here will not be uploaded to Vercel
+
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# Version Control
+.hg
+.svn
+.bzr
+
+# Dependencies (Vercel installs from package.json)
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+bun.lockb
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Testing
+tests
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+.playwright
+.coverage
+
+# Development
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+*~
+.env.local
+.env.*.local
+
+# Build artifacts (Vite will rebuild)
+dist
+build
+
+# Logs
+logs
+*.log
+
+# Artifacts from CI/CD
+.github/workflows
+.gitflow.json
+
+# Config files (not needed for deployment)
+tsconfig.node.json
+vitest.config.ts
+eslint.config.js
+postcss.config.js
+tailwind.config.ts

@@ -1,0 +1,276 @@
+name: Deploy to Vercel & Netlify
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  NPM_CACHE: 'npm'
+
+jobs:
+  # ============================================================================
+  # DETERMINE DEPLOYMENT TARGET
+  # ============================================================================
+  
+  determine-target:
+    name: Determine Deployment Target
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.target.outputs.target }}
+      is-preview: ${{ steps.target.outputs.is-preview }}
+      is-production: ${{ steps.target.outputs.is-production }}
+      environment: ${{ steps.target.outputs.environment }}
+    
+    steps:
+      - name: Determine target environment
+        id: target
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "target=preview" >> $GITHUB_OUTPUT
+            echo "is-preview=true" >> $GITHUB_OUTPUT
+            echo "is-production=false" >> $GITHUB_OUTPUT
+            echo "environment=preview" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "target=production" >> $GITHUB_OUTPUT
+            echo "is-preview=false" >> $GITHUB_OUTPUT
+            echo "is-production=true" >> $GITHUB_OUTPUT
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "target=staging" >> $GITHUB_OUTPUT
+            echo "is-preview=false" >> $GITHUB_OUTPUT
+            echo "is-production=false" >> $GITHUB_OUTPUT
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+  # ============================================================================
+  # BUILD FOR DEPLOYMENT
+  # ============================================================================
+  
+  build:
+    name: Build for Deployment
+    runs-on: ubuntu-latest
+    needs: determine-target
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.NPM_CACHE }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Generate build metadata
+        id: metadata
+        run: |
+          BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          GIT_SHA=${{ github.sha }}
+          GIT_BRANCH=${{ github.ref_name }}
+          BUILD_ID="${GIT_BRANCH}-${GIT_SHA:0:7}-$(date +%s)"
+          
+          echo "build-time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "git-sha=$GIT_SHA" >> $GITHUB_OUTPUT
+          echo "git-branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
+          echo "build-id=$BUILD_ID" >> $GITHUB_OUTPUT
+          
+          # Create build info file
+          cat > dist/BUILD_INFO.json << EOF
+          {
+            "buildTime": "$BUILD_TIME",
+            "gitSha": "$GIT_SHA",
+            "gitBranch": "$GIT_BRANCH",
+            "buildId": "$BUILD_ID",
+            "environment": "${{ needs.determine-target.outputs.environment }}"
+          }
+          EOF
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ============================================================================
+  # DEPLOY TO VERCEL (Preview & Production)
+  # ============================================================================
+  
+  deploy-vercel:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [determine-target, build]
+    environment: ${{ needs.determine-target.outputs.environment }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel
+
+      - name: Deploy to Vercel (Preview)
+        if: github.event_name == 'pull_request'
+        id: deploy-preview
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --confirm)
+          echo "preview-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "✅ Preview deployment: $DEPLOYMENT_URL"
+
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main'
+        id: deploy-prod
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --confirm)
+          echo "production-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "✅ Production deployment: $DEPLOYMENT_URL"
+
+      - name: Deploy to Vercel (Staging)
+        if: github.ref == 'refs/heads/develop'
+        id: deploy-staging
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --confirm)
+          echo "staging-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "✅ Staging deployment: $DEPLOYMENT_URL"
+
+      - name: Comment PR with deployment URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Vercel Preview Deployment Ready!**\n\n[Visit Preview →](${{ steps.deploy-preview.outputs.preview-url }})`
+            })
+
+      - name: Report deployment status
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "✅ Preview: ${{ steps.deploy-preview.outputs.preview-url }}"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "✅ Production: ${{ steps.deploy-prod.outputs.production-url }}"
+          else
+            echo "✅ Staging: ${{ steps.deploy-staging.outputs.staging-url }}"
+          fi
+
+  # ============================================================================
+  # DEPLOY TO NETLIFY (Preview & Production)
+  # ============================================================================
+  
+  deploy-netlify:
+    name: Deploy to Netlify
+    runs-on: ubuntu-latest
+    needs: [determine-target, build]
+    environment: ${{ needs.determine-target.outputs.environment }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Deploy to Netlify (Preview)
+        if: github.event_name == 'pull_request'
+        id: deploy-preview
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=dist
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Deploy to Netlify (Production)
+        if: github.ref == 'refs/heads/main'
+        id: deploy-prod
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=dist --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Deploy to Netlify (Staging)
+        if: github.ref == 'refs/heads/develop'
+        id: deploy-staging
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=dist
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Comment PR with deployment URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🌐 **Netlify Preview Deployment Ready!**\n\n[Visit Preview →](${{ steps.deploy-preview.outputs.deploy-url }})`
+            })
+
+  # ============================================================================
+  # DEPLOYMENT SUMMARY
+  # ============================================================================
+  
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [determine-target, deploy-vercel, deploy-netlify]
+    if: always()
+    
+    steps:
+      - name: Report deployment success
+        if: success()
+        run: |
+          echo "✅ All deployments completed successfully!"
+          echo "Environment: ${{ needs.determine-target.outputs.environment }}"
+          echo "Target: ${{ needs.determine-target.outputs.target }}"
+
+      - name: Report deployment failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          exit 1

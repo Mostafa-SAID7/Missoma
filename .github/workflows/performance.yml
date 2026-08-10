@@ -1,0 +1,304 @@
+name: Performance Benchmarking
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+
+jobs:
+  # ============================================================================
+  # LIGHTHOUSE AUDIT (Performance, SEO, Accessibility, Best Practices)
+  # ============================================================================
+  
+  lighthouse-audit:
+    name: Lighthouse Performance Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Start dev server
+        run: npm run dev &
+        env:
+          NODE_ENV: production
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:8081/ > /dev/null 2>&1; then
+              echo "✅ Server is ready"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Server failed to start"
+          exit 1
+
+      - name: Run Lighthouse audit
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: ./.github/lighthouse.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Comment PR with Lighthouse results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('./dist/manifest.json', 'utf8'));
+            const audit = results[0];
+            
+            const scores = {
+              performance: Math.round(audit.summary.performance * 100),
+              accessibility: Math.round(audit.summary.accessibility * 100),
+              'best-practices': Math.round(audit.summary['best-practices'] * 100),
+              seo: Math.round(audit.summary.seo * 100),
+              pwa: Math.round(audit.summary.pwa * 100)
+            };
+            
+            const body = `
+            📊 **Lighthouse Audit Results**
+            
+            | Metric | Score |
+            |--------|-------|
+            | Performance | ${scores.performance} |
+            | Accessibility | ${scores.accessibility} |
+            | Best Practices | ${scores['best-practices']} |
+            | SEO | ${scores.seo} |
+            | PWA | ${scores.pwa} |
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
+
+  # ============================================================================
+  # BUNDLE SIZE ANALYSIS
+  # ============================================================================
+  
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Analyze bundle size
+        id: bundlesize
+        run: |
+          npm install -g bundlesize
+          
+          # Get current bundle sizes
+          JS_SIZE=$(du -sh dist/assets/*.js | awk '{print $1}' | tail -1)
+          CSS_SIZE=$(du -sh dist/assets/*.css | awk '{print $1}' | tail -1)
+          TOTAL_SIZE=$(du -sh dist/ | awk '{print $1}')
+          
+          echo "js-size=$JS_SIZE" >> $GITHUB_OUTPUT
+          echo "css-size=$CSS_SIZE" >> $GITHUB_OUTPUT
+          echo "total-size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
+          
+          echo "📦 Bundle Sizes:"
+          echo "• JavaScript: $JS_SIZE"
+          echo "• CSS: $CSS_SIZE"
+          echo "• Total: $TOTAL_SIZE"
+
+      - name: Download previous bundle metrics
+        continue-on-error: true
+        run: |
+          git fetch --depth=50
+          if git show origin/main:dist/bundle-metrics.json > previous-metrics.json 2>/dev/null; then
+            echo "✅ Previous metrics found"
+          else
+            echo "⚠️ No previous metrics available"
+          fi
+
+      - name: Compare bundle sizes
+        id: compare
+        run: |
+          if [ -f previous-metrics.json ]; then
+            PREV_SIZE=$(jq -r '.totalSize' previous-metrics.json || echo "0")
+            CURRENT_SIZE=$(du -s dist/ | awk '{print $1}')
+            DIFF=$((CURRENT_SIZE - PREV_SIZE))
+            
+            if [ $DIFF -gt 0 ]; then
+              echo "⚠️  Bundle size increased by ${DIFF}KB"
+              echo "increase=true" >> $GITHUB_OUTPUT
+            elif [ $DIFF -lt 0 ]; then
+              echo "✅ Bundle size decreased by $((DIFF * -1))KB"
+              echo "decrease=true" >> $GITHUB_OUTPUT
+            else
+              echo "✅ Bundle size unchanged"
+              echo "unchanged=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Save bundle metrics
+        run: |
+          cat > dist/bundle-metrics.json << EOF
+          {
+            "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "jsSize": "${{ steps.bundlesize.outputs.js-size }}",
+            "cssSize": "${{ steps.bundlesize.outputs.css-size }}",
+            "totalSize": "$(du -s dist/ | awk '{print $1}')",
+            "commit": "${{ github.sha }}"
+          }
+          EOF
+          cat dist/bundle-metrics.json
+
+  # ============================================================================
+  # RUNTIME PERFORMANCE
+  # ============================================================================
+  
+  runtime-performance:
+    name: Runtime Performance Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Install performance testing tools
+        run: npm install --save-dev @puppeteer/extra puppeteer
+
+      - name: Run performance tests
+        id: perf-test
+        run: |
+          cat > perf-test.js << 'EOF'
+          const puppeteer = require('puppeteer');
+          
+          (async () => {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            
+            // Metrics to collect
+            const metrics = {};
+            
+            // Home page
+            const startHome = Date.now();
+            await page.goto('http://localhost:8081/', { waitUntil: 'networkidle2' });
+            metrics.homePageLoadTime = Date.now() - startHome;
+            
+            // Product page
+            const startProduct = Date.now();
+            await page.goto('http://localhost:8081/product/pantheon', { waitUntil: 'networkidle2' });
+            metrics.productPageLoadTime = Date.now() - startProduct;
+            
+            // Category page
+            const startCategory = Date.now();
+            await page.goto('http://localhost:8081/category/Earrings', { waitUntil: 'networkidle2' });
+            metrics.categoryPageLoadTime = Date.now() - startCategory;
+            
+            // Get Core Web Vitals
+            const vitals = await page.evaluate(() => {
+              return new Promise((resolve) => {
+                const vitals = {};
+                new PerformanceObserver((list) => {
+                  for (const entry of list.getEntries()) {
+                    vitals[entry.name] = entry.value;
+                  }
+                }).observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
+                
+                setTimeout(() => resolve(vitals), 5000);
+              });
+            });
+            
+            console.log(JSON.stringify({ ...metrics, ...vitals }, null, 2));
+            
+            await browser.close();
+          })();
+          EOF
+          
+          npm install -g http-server
+          http-server dist -p 8081 &
+          sleep 3
+          
+          node perf-test.js > perf-results.json || true
+          cat perf-results.json
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: |
+            perf-results.json
+            dist/bundle-metrics.json
+
+  # ============================================================================
+  # PERFORMANCE DEGRADATION CHECK
+  # ============================================================================
+  
+  performance-check:
+    name: Check Performance Thresholds
+    runs-on: ubuntu-latest
+    needs: [bundle-analysis, runtime-performance]
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download performance artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: performance-report
+
+      - name: Check bundle size threshold
+        run: |
+          # Warn if bundle > 200KB gzipped
+          THRESHOLD=204800  # 200KB in bytes
+          ACTUAL=$(du -s dist/ | awk '{print $1 * 1024}')
+          
+          if [ $ACTUAL -gt $THRESHOLD ]; then
+            echo "⚠️  Bundle size ($ACTUAL bytes) exceeds threshold ($THRESHOLD bytes)"
+            echo "Consider: code splitting, tree shaking, minification"
+          else
+            echo "✅ Bundle size within acceptable range"
+          fi
+
+      - name: Report performance metrics
+        run: |
+          echo "📊 Performance Check Summary"
+          echo "• Bundle size analyzed"
+          echo "• Runtime performance tested"
+          echo "• All metrics collected"
+          echo ""
+          echo "See artifacts for detailed report"

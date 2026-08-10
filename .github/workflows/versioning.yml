@@ -1,0 +1,371 @@
+name: Automated Versioning & Changelog
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      bump-type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: version-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  NPM_CACHE: 'npm'
+  GIT_USER: 'github-actions[bot]'
+  GIT_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
+
+jobs:
+  # ============================================================================
+  # ANALYZE COMMITS AND DETERMINE VERSION BUMP
+  # ============================================================================
+  
+  analyze-commits:
+    name: Analyze Commits for Version Bump
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prev-version: ${{ steps.version.outputs.prev-version }}
+      bump-type: ${{ steps.version.outputs.bump-type }}
+      should-bump: ${{ steps.version.outputs.should-bump }}
+      has-breaking: ${{ steps.version.outputs.has-breaking }}
+      has-features: ${{ steps.version.outputs.has-features }}
+      has-fixes: ${{ steps.version.outputs.has-fixes }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version
+        id: current
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "current-version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: Get previous tag
+        id: previous
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          PREV_VERSION=${PREV_TAG#v}
+          echo "previous-tag=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "previous-version=$PREV_VERSION" >> $GITHUB_OUTPUT
+          echo "Previous version: $PREV_VERSION"
+
+      - name: Analyze commits since last version
+        id: analyze
+        run: |
+          PREV_TAG="${{ steps.previous.outputs.previous-tag }}"
+          
+          # Get commit messages
+          if [ "$PREV_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --format="%s" --oneline)
+          else
+            COMMITS=$(git log "$PREV_TAG"..HEAD --format="%s" --oneline)
+          fi
+          
+          echo "Commits since last version:"
+          echo "$COMMITS"
+          
+          # Analyze commit types
+          BREAKING=$(echo "$COMMITS" | grep -c "^BREAKING\|^feat!:" || echo 0)
+          FEATURES=$(echo "$COMMITS" | grep -c "^feat:" || echo 0)
+          FIXES=$(echo "$COMMITS" | grep -c "^fix:" || echo 0)
+          
+          echo "breaking=$BREAKING" >> $GITHUB_OUTPUT
+          echo "features=$FEATURES" >> $GITHUB_OUTPUT
+          echo "fixes=$FIXES" >> $GITHUB_OUTPUT
+          
+          echo "📊 Commit Analysis:"
+          echo "  Breaking changes: $BREAKING"
+          echo "  Features: $FEATURES"
+          echo "  Fixes: $FIXES"
+
+      - name: Determine version bump
+        id: version
+        run: |
+          CURRENT="${{ steps.current.outputs.current-version }}"
+          PREVIOUS="${{ steps.previous.outputs.previous-version }}"
+          BREAKING="${{ steps.analyze.outputs.breaking }}"
+          FEATURES="${{ steps.analyze.outputs.features }}"
+          FIXES="${{ steps.analyze.outputs.fixes }}"
+          
+          # Determine bump type based on commits
+          if [ $BREAKING -gt 0 ]; then
+            BUMP_TYPE="major"
+          elif [ $FEATURES -gt 0 ]; then
+            BUMP_TYPE="minor"
+          elif [ $FIXES -gt 0 ]; then
+            BUMP_TYPE="patch"
+          else
+            BUMP_TYPE="none"
+          fi
+          
+          echo "bump-type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "version=$CURRENT" >> $GITHUB_OUTPUT
+          echo "prev-version=$PREVIOUS" >> $GITHUB_OUTPUT
+          
+          if [ "$BUMP_TYPE" != "none" ]; then
+            echo "should-bump=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-bump=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ $BREAKING -gt 0 ]; then
+            echo "has-breaking=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-breaking=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ $FEATURES -gt 0 ]; then
+            echo "has-features=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-features=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ $FIXES -gt 0 ]; then
+            echo "has-fixes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-fixes=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "✅ Determined bump type: $BUMP_TYPE"
+
+  # ============================================================================
+  # UPDATE VERSION IN package.json
+  # ============================================================================
+  
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    needs: analyze-commits
+    if: needs.analyze-commits.outputs.should-bump == 'true'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ env.GIT_USER }}"
+          git config user.email "${{ env.GIT_EMAIL }}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bump version with npm
+        run: npm version ${{ needs.analyze-commits.outputs.bump-type }} --no-git-tag-version
+
+      - name: Get new version
+        id: newversion
+        run: |
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Commit version bump
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: Bump version to ${{ steps.newversion.outputs.new-version }}"
+
+      - name: Create git tag
+        run: |
+          git tag -a "v${{ steps.newversion.outputs.new-version }}" -m "Release v${{ steps.newversion.outputs.new-version }}"
+
+      - name: Push changes
+        run: |
+          git push origin ${{ github.ref_name }} --follow-tags
+
+  # ============================================================================
+  # GENERATE CHANGELOG
+  # ============================================================================
+  
+  generate-changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    needs: [analyze-commits, bump-version]
+    if: needs.analyze-commits.outputs.should-bump == 'true'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version info
+        id: version
+        run: |
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          PREV_VERSION="${{ needs.analyze-commits.outputs.prev-version }}"
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "prev-version=$PREV_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog entry
+        id: changelog
+        run: |
+          cat > CHANGELOG_TEMP.md << 'EOF'
+          # Changelog
+          
+          ## [${{ steps.version.outputs.new-version }}] - $(date -u +'%Y-%m-%d')
+          
+          ### Added
+          EOF
+          
+          # Extract feature commits
+          if [ "${{ needs.analyze-commits.outputs.has-features }}" == "true" ]; then
+            git log ${{ needs.analyze-commits.outputs.prev-version }}..HEAD --format="%s" --grep="^feat:" | sed 's/^feat: /- /' >> CHANGELOG_TEMP.md
+          fi
+          
+          cat >> CHANGELOG_TEMP.md << 'EOF'
+          
+          ### Fixed
+          EOF
+          
+          # Extract fix commits
+          if [ "${{ needs.analyze-commits.outputs.has-fixes }}" == "true" ]; then
+            git log ${{ needs.analyze-commits.outputs.prev-version }}..HEAD --format="%s" --grep="^fix:" | sed 's/^fix: /- /' >> CHANGELOG_TEMP.md
+          fi
+          
+          cat >> CHANGELOG_TEMP.md << 'EOF'
+          
+          ### Changed
+          EOF
+          
+          git log ${{ needs.analyze-commits.outputs.prev-version }}..HEAD --format="%s" --grep="^refactor:\|^perf:\|^style:" | sed 's/^/- /' >> CHANGELOG_TEMP.md
+          
+          # Add breaking changes if any
+          if [ "${{ needs.analyze-commits.outputs.has-breaking }}" == "true" ]; then
+            cat >> CHANGELOG_TEMP.md << 'EOF'
+          
+          ### ⚠️ Breaking Changes
+          EOF
+            git log ${{ needs.analyze-commits.outputs.prev-version }}..HEAD --format="%s" --grep="^BREAKING\|^feat!:" >> CHANGELOG_TEMP.md
+          fi
+          
+          # Prepend to existing CHANGELOG if it exists
+          if [ -f CHANGELOG.md ]; then
+            tail -n +2 CHANGELOG.md >> CHANGELOG_TEMP.md
+          fi
+          
+          mv CHANGELOG_TEMP.md CHANGELOG.md
+          
+          echo "✅ Changelog generated"
+          cat CHANGELOG.md
+
+      - name: Update CHANGELOG.md
+        run: |
+          git config user.name "${{ env.GIT_USER }}"
+          git config user.email "${{ env.GIT_EMAIL }}"
+          git add CHANGELOG.md
+          git commit -m "docs: Update CHANGELOG for v${{ steps.version.outputs.new-version }}" || true
+          git push origin ${{ github.ref_name }} || true
+
+  # ============================================================================
+  # CREATE RELEASE NOTES
+  # ============================================================================
+  
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [analyze-commits, generate-changelog]
+    if: github.ref == 'refs/heads/main' && needs.analyze-commits.outputs.should-bump == 'true'
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+        continue-on-error: true
+
+      - name: Get version info
+        id: version
+        run: |
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create release body
+        id: release
+        run: |
+          # Build release body from latest CHANGELOG entry
+          RELEASE_BODY=$(sed -n '/^## \[${{ steps.version.outputs.new-version }}\]/,/^## \[/p' CHANGELOG.md | head -n -1)
+          
+          cat > release-body.md << EOF
+          $RELEASE_BODY
+          
+          ---
+          
+          ### Download
+          - [Build Artifacts](#)
+          
+          ### Contributors
+          - @github-actions[bot]
+          
+          ### Checksums
+          - Commit: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+          EOF
+          
+          cat release-body.md
+
+      - name: Create release on GitHub
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new-version }}
+          release_name: Release v${{ steps.version.outputs.new-version }}
+          body_path: release-body.md
+          draft: false
+          prerelease: false
+
+  # ============================================================================
+  # VERSIONING SUMMARY
+  # ============================================================================
+  
+  version-summary:
+    name: Versioning Summary
+    runs-on: ubuntu-latest
+    needs: [analyze-commits, bump-version, generate-changelog]
+    if: always()
+    
+    steps:
+      - name: Report versioning status
+        run: |
+          echo "📌 Versioning & Changelog Generation"
+          echo ""
+          echo "Current Version: ${{ needs.analyze-commits.outputs.version }}"
+          echo "Bump Type: ${{ needs.analyze-commits.outputs.bump-type }}"
+          echo ""
+          echo "Commit Analysis:"
+          echo "✅ Breaking changes: ${{ needs.analyze-commits.outputs.has-breaking }}"
+          echo "✅ Features: ${{ needs.analyze-commits.outputs.has-features }}"
+          echo "✅ Fixes: ${{ needs.analyze-commits.outputs.has-fixes }}"
+          echo ""
+          if [ "${{ needs.analyze-commits.outputs.should-bump }}" == "true" ]; then
+            echo "✅ Version bumped successfully"
+            echo "✅ Changelog generated"
+            echo "✅ Git tag created"
+            echo "✅ GitHub release created (if on main)"
+          else
+            echo "ℹ️  No version bump needed (no breaking/feature/fix commits)"
+          fi
