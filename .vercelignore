@@ -56,9 +56,6 @@ logs
 .github/workflows
 .gitflow.json
 
-# Config files (not needed for deployment)
-tsconfig.node.json
+# Config files (not needed for deployment, but keep tsconfig files needed by vite)
 vitest.config.ts
 eslint.config.js
-postcss.config.js
-tailwind.config.ts
