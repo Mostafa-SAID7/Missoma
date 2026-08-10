@@ -1,11 +1,8 @@
 {
   "ci": {
     "collect": {
-      "url": ["http://localhost:8081/", "http://localhost:8081/category/Earrings", "http://localhost:8081/product/pantheon"],
-      "numberOfRuns": 1,
-      "settings": {
-        "configPath": ".github/lighthouse-config.json"
-      }
+      "url": ["http://localhost:4173/", "http://localhost:4173/category/Earrings", "http://localhost:4173/product/pantheon"],
+      "numberOfRuns": 1
     },
     "upload": {
       "target": "temporary-public-storage"
