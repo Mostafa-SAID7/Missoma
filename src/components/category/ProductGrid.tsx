@@ -34,7 +34,7 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
     >
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product.slug}`}>
         <Card className="border-none shadow-none bg-transparent group cursor-pointer transition-all duration-500 hover-lift">
           <CardContent className="p-0">
             <div className="aspect-[3/4] mb-4 overflow-hidden bg-card relative rounded-2xl shadow-[0_4px_20px_-6px_hsl(25_30%_15%/0.08)] group-hover:shadow-[0_8px_24px_-8px_hsl(25_30%_15%/0.12)] transition-shadow duration-300">

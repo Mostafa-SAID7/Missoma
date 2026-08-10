@@ -1,8 +1,23 @@
 /**
- * Format price with currency symbol
+ * Convert text to URL-friendly slug
  */
-export const formatPrice = (priceNumeric: number, currency: string = "€"): string => {
-  return `${currency}${priceNumeric.toLocaleString("en-US")}`;
+export const slugify = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/[^\w-]/g, "") // Remove special characters
+    .replace(/--+/g, "-"); // Replace multiple hyphens with single hyphen
+};
+
+/**
+ * Unslugify - convert slug back to readable text
+ */
+export const unslugify = (slug: string): string => {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 /**

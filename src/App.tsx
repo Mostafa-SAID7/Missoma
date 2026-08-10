@@ -36,8 +36,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/category/:category" element={<Category />} />
+              <Route path="/product/:slug" element={<ProductDetail />} />
               <Route path="/search/:query" element={<Search />} />
-              <Route path="/product/:productId" element={<ProductDetail />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/about/our-story" element={<OurStory />} />
               <Route path="/about/sustainability" element={<Sustainability />} />

@@ -6,6 +6,7 @@ import ProductImageGallery from "../components/product/ProductImageGallery";
 import ProductInfo from "../components/product/ProductInfo";
 import ProductDescription from "../components/product/ProductDescription";
 import ProductCarousel from "../components/content/ProductCarousel";
+import { getProductBySlug } from "@/data/products";
 import { 
   Breadcrumb, 
   BreadcrumbItem, 
@@ -16,7 +17,8 @@ import {
 } from "@/components/ui/breadcrumb";
 
 const ProductDetail = () => {
-  const { productId } = useParams();
+  const { slug } = useParams();
+  const product = slug ? getProductBySlug(slug) : undefined;
 
   return (
     <div className="min-h-screen bg-background">
