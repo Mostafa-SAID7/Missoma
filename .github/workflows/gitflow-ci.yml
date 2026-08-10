@@ -181,13 +181,25 @@ jobs:
           name: dist
           path: dist/
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
+      - name: Check if release already exists
+        id: check-release
+        run: |
+          RELEASE_URL=$(gh release view v${{ needs.validate.outputs.version }} --json url -q .url 2>/dev/null || echo "")
+          if [ -z "$RELEASE_URL" ]; then
+            echo "exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release v${{ needs.validate.outputs.version }} already exists"
+          fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.check-release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.validate.outputs.version }}
-          release_name: Release v${{ needs.validate.outputs.version }}
+          name: Release v${{ needs.validate.outputs.version }}
           draft: false
           prerelease: false
           body: |
@@ -199,6 +211,14 @@ jobs:
             
             See commit history for details:
             ${{ github.server_url }}/${{ github.repository }}/commits/${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release already exists
+        if: steps.check-release.outputs.exists == 'true'
+        run: |
+          echo "✅ Release v${{ needs.validate.outputs.version }} already exists"
+          echo "Skipping release creation"
 
   # ============================================================================
   # RELEASE BRANCH NOTIFICATION
