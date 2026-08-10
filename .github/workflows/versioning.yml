@@ -80,10 +80,15 @@ jobs:
           echo "Commits since last version:"
           echo "$COMMITS"
           
-          # Analyze commit types
-          BREAKING=$(echo "$COMMITS" | grep -c "^BREAKING\|^feat!:" || echo 0)
-          FEATURES=$(echo "$COMMITS" | grep -c "^feat:" || echo 0)
-          FIXES=$(echo "$COMMITS" | grep -c "^fix:" || echo 0)
+          # Analyze commit types with proper error handling
+          BREAKING=$(echo "$COMMITS" | grep -cE "^BREAKING|^feat!" || true)
+          FEATURES=$(echo "$COMMITS" | grep -c "^feat:" || true)
+          FIXES=$(echo "$COMMITS" | grep -c "^fix:" || true)
+          
+          # Ensure values are numeric
+          BREAKING=${BREAKING:-0}
+          FEATURES=${FEATURES:-0}
+          FIXES=${FIXES:-0}
           
           echo "breaking=$BREAKING" >> $GITHUB_OUTPUT
           echo "features=$FEATURES" >> $GITHUB_OUTPUT
@@ -103,12 +108,17 @@ jobs:
           FEATURES="${{ steps.analyze.outputs.features }}"
           FIXES="${{ steps.analyze.outputs.fixes }}"
           
+          # Ensure all values are numeric
+          BREAKING=${BREAKING:-0}
+          FEATURES=${FEATURES:-0}
+          FIXES=${FIXES:-0}
+          
           # Determine bump type based on commits
-          if [ $BREAKING -gt 0 ]; then
+          if [ "$BREAKING" -gt 0 ] 2>/dev/null; then
             BUMP_TYPE="major"
-          elif [ $FEATURES -gt 0 ]; then
+          elif [ "$FEATURES" -gt 0 ] 2>/dev/null; then
             BUMP_TYPE="minor"
-          elif [ $FIXES -gt 0 ]; then
+          elif [ "$FIXES" -gt 0 ] 2>/dev/null; then
             BUMP_TYPE="patch"
           else
             BUMP_TYPE="none"
@@ -124,19 +134,19 @@ jobs:
             echo "should-bump=false" >> $GITHUB_OUTPUT
           fi
           
-          if [ $BREAKING -gt 0 ]; then
+          if [ "$BREAKING" -gt 0 ] 2>/dev/null; then
             echo "has-breaking=true" >> $GITHUB_OUTPUT
           else
             echo "has-breaking=false" >> $GITHUB_OUTPUT
           fi
           
-          if [ $FEATURES -gt 0 ]; then
+          if [ "$FEATURES" -gt 0 ] 2>/dev/null; then
             echo "has-features=true" >> $GITHUB_OUTPUT
           else
             echo "has-features=false" >> $GITHUB_OUTPUT
           fi
           
-          if [ $FIXES -gt 0 ]; then
+          if [ "$FIXES" -gt 0 ] 2>/dev/null; then
             echo "has-fixes=true" >> $GITHUB_OUTPUT
           else
             echo "has-fixes=false" >> $GITHUB_OUTPUT
