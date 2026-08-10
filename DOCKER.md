@@ -22,7 +22,7 @@ docker-compose logs -f app
 docker-compose down
 ```
 
-The app will be available at `http://localhost:3000`
+The app will be available at `http://localhost:4545`
 
 ### Using Docker CLI
 
@@ -31,7 +31,7 @@ The app will be available at `http://localhost:3000`
 docker build -t linea-jewelry:latest .
 
 # Run the container
-docker run -d --name linea-jewelry -p 3000:3000 linea-jewelry:latest
+docker run -d --name linea-jewelry -p 4545:4545 linea-jewelry:latest
 
 # View logs
 docker logs -f linea-jewelry
@@ -52,8 +52,8 @@ docker rm linea-jewelry
 - **Build Time**: ~2-3 minutes
 
 ### Ports
-- **Internal**: 3000
-- **External**: 3000 (configurable)
+- **Internal**: 4545
+- **External**: 4545 (configurable)
 
 ## Features
 
@@ -83,7 +83,7 @@ docker pull msaid356/linea-jewelry:main
 docker pull msaid356/linea-jewelry:v1.0.0
 
 # Run
-docker run -p 3000:3000 msaid356/linea-jewelry:latest
+docker run -p 4545:4545 msaid356/linea-jewelry:latest
 ```
 
 ## Local Testing
@@ -95,8 +95,8 @@ docker build -t linea-jewelry:test .
 
 ### Run Locally
 ```bash
-docker run -d --name test -p 3000:3000 linea-jewelry:test
-curl http://localhost:3000
+docker run -d --name test -p 4545:4545 linea-jewelry:test
+curl http://localhost:4545
 docker stop test
 ```
 

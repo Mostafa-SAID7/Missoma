@@ -47,9 +47,9 @@ Your images will appear at:
 docker pull msaid356/linea-jewelry:main
 
 # Run it
-docker run -p 3000:3000 msaid356/linea-jewelry:main
+docker run -p 4545:4545 msaid356/linea-jewelry:main
 
-# View at http://localhost:3000
+# View at http://localhost:4545
 ```
 
 ## Files Already in Repo
@@ -69,7 +69,7 @@ docker build -t linea-jewelry:test .
 # Run with docker-compose
 docker-compose up
 
-# App opens on http://localhost:3000
+# App opens on http://localhost:4545
 ```
 
 ## Summary
