@@ -2,8 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useFilter } from "@/contexts/FilterContext";
 import { useScrollFadeIn } from "@/hooks/useScrollFadeIn";
 import Pagination from "./Pagination";
+import { useMemo } from "react";
 import pantheonImage from "@/assets/pantheon.jpg";
 import eclipseImage from "@/assets/eclipse.jpg";
 import haloImage from "@/assets/halo.jpg";
@@ -18,35 +20,36 @@ interface Product {
   name: string;
   category: string;
   price: string;
+  priceNumeric: number;
   image: string;
   isNew?: boolean;
 }
 
 const products: Product[] = [
-  { id: 1, name: "Pantheon", category: "Earrings", price: "€2,850", image: pantheonImage, isNew: true },
-  { id: 2, name: "Eclipse", category: "Bracelets", price: "€3,200", image: eclipseImage },
-  { id: 3, name: "Halo", category: "Earrings", price: "€1,950", image: haloImage, isNew: true },
-  { id: 4, name: "Oblique", category: "Earrings", price: "€1,650", image: obliqueImage },
-  { id: 5, name: "Lintel", category: "Earrings", price: "€2,250", image: lintelImage },
-  { id: 6, name: "Shadowline", category: "Bracelets", price: "€3,950", image: shadowlineImage },
-  { id: 7, name: "Meridian", category: "Earrings", price: "€2,450", image: pantheonImage },
-  { id: 8, name: "Vertex", category: "Bracelets", price: "€2,800", image: eclipseImage },
-  { id: 9, name: "Apex", category: "Earrings", price: "€1,550", image: haloImage },
-  { id: 10, name: "Zenith", category: "Earrings", price: "€1,850", image: obliqueImage },
-  { id: 11, name: "Prism", category: "Earrings", price: "€2,050", image: lintelImage },
-  { id: 12, name: "Radiant", category: "Bracelets", price: "€3,650", image: shadowlineImage },
-  { id: 13, name: "Stellar", category: "Earrings", price: "€2,150", image: pantheonImage },
-  { id: 14, name: "Cosmos", category: "Bracelets", price: "€2,950", image: eclipseImage },
-  { id: 15, name: "Aurora", category: "Earrings", price: "€1,750", image: haloImage },
-  { id: 16, name: "Nebula", category: "Earrings", price: "€1,850", image: obliqueImage },
-  { id: 17, name: "Orbit", category: "Earrings", price: "€2,350", image: lintelImage },
-  { id: 18, name: "Galaxy", category: "Bracelets", price: "€3,450", image: shadowlineImage },
-  { id: 19, name: "Lunar", category: "Earrings", price: "€2,050", image: pantheonImage },
-  { id: 20, name: "Solar", category: "Bracelets", price: "€3,150", image: eclipseImage },
-  { id: 21, name: "Astral", category: "Earrings", price: "€1,650", image: haloImage },
-  { id: 22, name: "Cosmic", category: "Earrings", price: "€1,950", image: obliqueImage },
-  { id: 23, name: "Celestial", category: "Earrings", price: "€2,250", image: lintelImage },
-  { id: 24, name: "Ethereal", category: "Bracelets", price: "€3,750", image: shadowlineImage },
+  { id: 1, name: "Pantheon", category: "Earrings", price: "€2,850", priceNumeric: 2850, image: pantheonImage, isNew: true },
+  { id: 2, name: "Eclipse", category: "Bracelets", price: "€3,200", priceNumeric: 3200, image: eclipseImage },
+  { id: 3, name: "Halo", category: "Earrings", price: "€1,950", priceNumeric: 1950, image: haloImage, isNew: true },
+  { id: 4, name: "Oblique", category: "Earrings", price: "€1,650", priceNumeric: 1650, image: obliqueImage },
+  { id: 5, name: "Lintel", category: "Earrings", price: "€2,250", priceNumeric: 2250, image: lintelImage },
+  { id: 6, name: "Shadowline", category: "Bracelets", price: "€3,950", priceNumeric: 3950, image: shadowlineImage },
+  { id: 7, name: "Meridian", category: "Earrings", price: "€2,450", priceNumeric: 2450, image: pantheonImage },
+  { id: 8, name: "Vertex", category: "Bracelets", price: "€2,800", priceNumeric: 2800, image: eclipseImage },
+  { id: 9, name: "Apex", category: "Earrings", price: "€1,550", priceNumeric: 1550, image: haloImage },
+  { id: 10, name: "Zenith", category: "Earrings", price: "€1,850", priceNumeric: 1850, image: obliqueImage },
+  { id: 11, name: "Prism", category: "Earrings", price: "€2,050", priceNumeric: 2050, image: lintelImage },
+  { id: 12, name: "Radiant", category: "Bracelets", price: "€3,650", priceNumeric: 3650, image: shadowlineImage },
+  { id: 13, name: "Stellar", category: "Earrings", price: "€2,150", priceNumeric: 2150, image: pantheonImage },
+  { id: 14, name: "Cosmos", category: "Bracelets", price: "€2,950", priceNumeric: 2950, image: eclipseImage },
+  { id: 15, name: "Aurora", category: "Earrings", price: "€1,750", priceNumeric: 1750, image: haloImage },
+  { id: 16, name: "Nebula", category: "Earrings", price: "€1,850", priceNumeric: 1850, image: obliqueImage },
+  { id: 17, name: "Orbit", category: "Earrings", price: "€2,350", priceNumeric: 2350, image: lintelImage },
+  { id: 18, name: "Galaxy", category: "Bracelets", price: "€3,450", priceNumeric: 3450, image: shadowlineImage },
+  { id: 19, name: "Lunar", category: "Earrings", price: "€2,050", priceNumeric: 2050, image: pantheonImage },
+  { id: 20, name: "Solar", category: "Bracelets", price: "€3,150", priceNumeric: 3150, image: eclipseImage },
+  { id: 21, name: "Astral", category: "Earrings", price: "€1,650", priceNumeric: 1650, image: haloImage },
+  { id: 22, name: "Cosmic", category: "Earrings", price: "€1,950", priceNumeric: 1950, image: obliqueImage },
+  { id: 23, name: "Celestial", category: "Earrings", price: "€2,250", priceNumeric: 2250, image: lintelImage },
+  { id: 24, name: "Ethereal", category: "Bracelets", price: "€3,750", priceNumeric: 3750, image: shadowlineImage },
 ];
 
 const ProductCard = ({ product, index }: { product: Product; index: number }) => {
@@ -106,17 +109,63 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
 };
 
 const ProductGrid = () => {
+  const { filters } = useFilter();
+  const { categories, priceRange, sortBy, currentPage, itemsPerPage } = filters;
+
+  // Filter and sort products
+  const displayedProducts = useMemo(() => {
+    let filtered = products;
+
+    // Apply category filter
+    if (categories.length > 0) {
+      filtered = filtered.filter((p) =>
+        categories.includes(p.category)
+      );
+    }
+
+    // Apply price range filter
+    filtered = filtered.filter(
+      (p) => p.priceNumeric >= priceRange[0] && p.priceNumeric <= priceRange[1]
+    );
+
+    // Apply sorting
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case "price-low":
+        sorted.sort((a, b) => a.priceNumeric - b.priceNumeric);
+        break;
+      case "price-high":
+        sorted.sort((a, b) => b.priceNumeric - a.priceNumeric);
+        break;
+      case "newest":
+        sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        break;
+      case "name":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "featured":
+      default:
+        // Keep original order
+        break;
+    }
+
+    // Apply pagination
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    return sorted.slice(startIdx, endIdx);
+  }, [filters]);
+
   return (
     <section className="w-full mb-16">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-        {products.map((product, index) => (
-          <ProductCard key={product.id} product={product} index={index} />
-        ))}
+          {displayedProducts.map((product, index) => (
+            <ProductCard key={product.id} product={product} index={index} />
+          ))}
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-6">
-        <Pagination />
+        <Pagination totalItems={products.length} />
       </div>
     </section>
   );
