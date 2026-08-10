@@ -2,7 +2,7 @@
  * Product Service - Handles product-related API calls and operations
  */
 
-import { Product } from "@/types";
+import { Product, CartItem } from "@/types";
 import { products, searchProducts as searchProductsData } from "@/data/products";
 
 class ProductService {
@@ -61,7 +61,7 @@ class CartService {
   /**
    * Get cart from localStorage
    */
-  getCart(): any[] {
+  getCart(): CartItem[] {
     const cart = localStorage.getItem(this.storageKey);
     return cart ? JSON.parse(cart) : [];
   }
@@ -69,7 +69,7 @@ class CartService {
   /**
    * Save cart to localStorage
    */
-  saveCart(cart: any[]): void {
+  saveCart(cart: CartItem[]): void {
     localStorage.setItem(this.storageKey, JSON.stringify(cart));
   }
 

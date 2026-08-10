@@ -112,7 +112,7 @@ const ProductGrid = () => {
     const startIdx = (currentPage - 1) * itemsPerPage;
     const endIdx = startIdx + itemsPerPage;
     return sorted.slice(startIdx, endIdx);
-  }, [filters]);
+  }, [categories, priceRange, sortBy, currentPage, itemsPerPage]);
 
   return (
     <section className="w-full mb-16">

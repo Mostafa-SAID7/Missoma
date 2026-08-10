@@ -44,12 +44,12 @@ export const generateId = (): string => {
 /**
  * Debounce function
  */
-export const debounce = <T extends (...args: any[]) => any>(
-  func: T,
+export const debounce = <Args extends unknown[]>(
+  func: (...args: Args) => void,
   delay: number
-): ((...args: Parameters<T>) => void) => {
+): ((...args: Args) => void) => {
   let timeoutId: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
+  return (...args: Args) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       func(...args);
@@ -60,13 +60,13 @@ export const debounce = <T extends (...args: any[]) => any>(
 /**
  * Check if value is empty
  */
-export const isEmpty = (value: any): boolean => {
+export const isEmpty = (value: unknown): boolean => {
   return (
     value === undefined ||
     value === null ||
     (typeof value === "string" && value.trim() === "") ||
     (Array.isArray(value) && value.length === 0) ||
-    (typeof value === "object" && Object.keys(value).length === 0)
+    (typeof value === "object" && Object.keys(value as Record<string, unknown>).length === 0)
   );
 };
 
@@ -103,9 +103,9 @@ export const formatDate = (date: Date | string, format: string = "MM/DD/YYYY"): 
 /**
  * URL encode parameters
  */
-export const encodeParams = (params: Record<string, any>): string => {
+export const encodeParams = (params: Record<string, unknown>): string => {
   return Object.entries(params)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
     .join("&");
 };
 
@@ -121,6 +121,6 @@ export const isValidEmail = (email: string): boolean => {
  * Validate phone number
  */
 export const isValidPhone = (phone: string): boolean => {
-  const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+  const phoneRegex = /^[\d\s\-()+]{10,}$/;
   return phoneRegex.test(phone);
 };
