@@ -139,8 +139,8 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
             <div className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg bg-background hover:border-foreground/20 transition-all duration-300 group">
               <span className="text-xs font-light text-muted-foreground group-hover:text-foreground/70 transition-colors">Sort</span>
               <Select value={filters.sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                <SelectTrigger className="w-auto border-none bg-transparent text-sm font-light shadow-none rounded-none p-0 h-auto gap-2 group-hover:text-foreground transition-colors [&_svg]:size-4">
-                  <SelectValue placeholder="Select sort" />
+                <SelectTrigger className="w-auto border-none bg-transparent text-sm font-light shadow-none rounded-none p-0 h-auto gap-2 group-hover:text-foreground transition-colors [&>svg]:hidden">
+                  <SelectValue />
                   <ChevronDown className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </SelectTrigger>
                 <SelectContent 
