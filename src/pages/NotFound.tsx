@@ -34,7 +34,7 @@ const NotFound = () => {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-4 sm:px-6 md:px-8 py-16">
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-4 sm:px-6 md:px-8 py-12">
           
           {/* Main 404 Display */}
           <div className={`text-center mb-8 transition-all duration-1000 ${animate ? "opacity-100" : "opacity-0"}`}>
@@ -106,7 +106,7 @@ const NotFound = () => {
 
           {/* Helpful links */}
           <div 
-            className="mt-16 text-center"
+            className="mt-8 text-center"
             style={{ animation: animate ? "cinematicFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both" : "none" }}
           >
             <p className="text-sm text-muted-foreground mb-4">Need help? Try these:</p>
