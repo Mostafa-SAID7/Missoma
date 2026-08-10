@@ -144,37 +144,43 @@ jobs:
         if: github.event_name == 'pull_request'
         id: deploy-preview
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --confirm)
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "❌ VERCEL_TOKEN is not set"
+            exit 1
+          fi
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token "$VERCEL_TOKEN" --confirm)
           echo "preview-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Preview deployment: $DEPLOYMENT_URL"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         id: deploy-prod
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --confirm)
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "❌ VERCEL_TOKEN is not set"
+            exit 1
+          fi
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN" --confirm)
           echo "production-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Production deployment: $DEPLOYMENT_URL"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Deploy to Vercel (Staging)
         if: github.ref == 'refs/heads/develop'
         id: deploy-staging
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --confirm)
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "❌ VERCEL_TOKEN is not set"
+            exit 1
+          fi
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token "$VERCEL_TOKEN" --confirm)
           echo "staging-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Staging deployment: $DEPLOYMENT_URL"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Comment PR with deployment URL
         if: github.event_name == 'pull_request'
