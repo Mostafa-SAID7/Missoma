@@ -147,11 +147,11 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
                   className="min-w-[200px] border border-border bg-background shadow-lg rounded-2xl overflow-hidden p-1"
                   align="end"
                 >
-                  <SelectItem value="featured" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors">Featured</SelectItem>
-                  <SelectItem value="price-low" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors">Price: High to Low</SelectItem>
-                  <SelectItem value="newest" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors">Newest</SelectItem>
-                  <SelectItem value="name" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors">Name A-Z</SelectItem>
+                  <SelectItem value="featured" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors flex justify-between [&>span:last-child]:order-2">Featured</SelectItem>
+                  <SelectItem value="price-low" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors flex justify-between [&>span:last-child]:order-2">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors flex justify-between [&>span:last-child]:order-2">Price: High to Low</SelectItem>
+                  <SelectItem value="newest" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors flex justify-between [&>span:last-child]:order-2">Newest</SelectItem>
+                  <SelectItem value="name" className="font-light cursor-pointer rounded-lg px-3 py-2 hover:bg-card data-[state=checked]:bg-foreground data-[state=checked]:text-background transition-colors flex justify-between [&>span:last-child]:order-2">Name A-Z</SelectItem>
                 </SelectContent>
               </Select>
             </div>
