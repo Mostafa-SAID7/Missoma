@@ -144,7 +144,7 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
                   <ChevronDown className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </SelectTrigger>
                 <SelectContent 
-                  className="min-w-[200px] border-border bg-background shadow-lg rounded-lg overflow-hidden"
+                  className="min-w-[200px] border border-border bg-background shadow-lg rounded-xl overflow-hidden"
                   align="end"
                 >
                   <SelectItem value="featured" className="font-light hover:bg-card cursor-pointer">Featured</SelectItem>
