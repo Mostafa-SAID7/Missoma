@@ -18,6 +18,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useFilter } from "@/contexts/FilterContext";
 
 interface FilterSortBarProps {
   filtersOpen: boolean;
@@ -26,11 +27,30 @@ interface FilterSortBarProps {
 }
 
 const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBarProps) => {
-  const [sortBy, setSortBy] = useState("featured");
+  const { filters, setCategories, setSortBy, clearAllFilters } = useFilter();
+  const [localCategories, setLocalCategories] = useState(filters.categories);
 
   const categories = ["Earrings", "Bracelets", "Rings", "Necklaces"];
-  const priceRanges = ["Under €1,000", "€1,000 - €2,000", "€2,000 - €3,000", "Over €3,000"];
-  const materials = ["Gold", "Silver", "Rose Gold", "Platinum"];
+
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    let updated: string[];
+    if (checked) {
+      updated = [...localCategories, category];
+    } else {
+      updated = localCategories.filter((c) => c !== category);
+    }
+    setLocalCategories(updated);
+  };
+
+  const handleApplyFilters = () => {
+    setCategories(localCategories);
+    setFiltersOpen(false);
+  };
+
+  const handleClearAll = () => {
+    setLocalCategories([]);
+    clearAllFilters();
+  };
 
   return (
     <>
@@ -63,7 +83,14 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
                     <div className="space-y-3">
                       {categories.map((category) => (
                         <div key={category} className="flex items-center space-x-3">
-                          <Checkbox id={category} className="border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
+                          <Checkbox 
+                            id={category}
+                            checked={localCategories.includes(category)}
+                            onCheckedChange={(checked) =>
+                              handleCategoryChange(category, checked as boolean)
+                            }
+                            className="border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" 
+                          />
                           <Label htmlFor={category} className="text-sm font-light text-foreground cursor-pointer">
                             {category}
                           </Label>
@@ -74,45 +101,37 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
 
                   <Separator className="border-border" />
 
-                  {/* Price Filter */}
+                  {/* Price Filter - Placeholder */}
                   <div>
                     <h3 className="text-sm font-light mb-4 text-foreground">Price</h3>
-                    <div className="space-y-3">
-                      {priceRanges.map((range) => (
-                        <div key={range} className="flex items-center space-x-3">
-                          <Checkbox id={range} className="border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
-                          <Label htmlFor={range} className="text-sm font-light text-foreground cursor-pointer">
-                            {range}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-xs font-light text-muted-foreground">Price range slider coming soon</p>
                   </div>
 
                   <Separator className="border-border" />
 
-                  {/* Material Filter */}
+                  {/* Material Filter - Placeholder */}
                   <div>
                     <h3 className="text-sm font-light mb-4 text-foreground">Material</h3>
-                    <div className="space-y-3">
-                      {materials.map((material) => (
-                        <div key={material} className="flex items-center space-x-3">
-                          <Checkbox id={material} className="border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
-                          <Label htmlFor={material} className="text-sm font-light text-foreground cursor-pointer">
-                            {material}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-xs font-light text-muted-foreground">Material filters coming soon</p>
                   </div>
 
                   <Separator className="border-border" />
 
                   <div className="flex flex-col gap-2 pt-4">
-                    <Button variant="ghost" size="sm" className="w-full border-none hover:bg-transparent hover:underline font-normal text-left justify-start">
+                    <Button 
+                      onClick={handleApplyFilters}
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full border-none hover:bg-transparent hover:underline font-normal text-left justify-start"
+                    >
                       Apply Filters
                     </Button>
-                    <Button variant="ghost" size="sm" className="w-full border-none hover:bg-transparent hover:underline font-light text-left justify-start">
+                    <Button 
+                      onClick={handleClearAll}
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full border-none hover:bg-transparent hover:underline font-light text-left justify-start"
+                    >
                       Clear All
                     </Button>
                   </div>
@@ -120,7 +139,7 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
               </SheetContent>
             </Sheet>
 
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select value={filters.sortBy} onValueChange={(value) => setSortBy(value as any)}>
               <SelectTrigger className="w-auto border-none bg-transparent text-sm font-light shadow-none rounded-none pr-2">
                 <SelectValue />
               </SelectTrigger>
