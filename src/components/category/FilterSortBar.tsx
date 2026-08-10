@@ -147,11 +147,11 @@ const FilterSortBar = ({ filtersOpen, setFiltersOpen, itemCount }: FilterSortBar
                   className="min-w-[200px] border border-border bg-background shadow-lg rounded-2xl overflow-hidden"
                   align="end"
                 >
-                  <SelectItem value="featured" className="font-light hover:bg-card cursor-pointer">Featured</SelectItem>
-                  <SelectItem value="price-low" className="font-light hover:bg-card cursor-pointer">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high" className="font-light hover:bg-card cursor-pointer">Price: High to Low</SelectItem>
-                  <SelectItem value="newest" className="font-light hover:bg-card cursor-pointer">Newest</SelectItem>
-                  <SelectItem value="name" className="font-light hover:bg-card cursor-pointer">Name A-Z</SelectItem>
+                  <SelectItem value="featured" className="font-light hover:bg-card cursor-pointer rounded-lg m-1">Featured</SelectItem>
+                  <SelectItem value="price-low" className="font-light hover:bg-card cursor-pointer rounded-lg m-1">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high" className="font-light hover:bg-card cursor-pointer rounded-lg m-1">Price: High to Low</SelectItem>
+                  <SelectItem value="newest" className="font-light hover:bg-card cursor-pointer rounded-lg m-1">Newest</SelectItem>
+                  <SelectItem value="name" className="font-light hover:bg-card cursor-pointer rounded-lg m-1">Name A-Z</SelectItem>
                 </SelectContent>
               </Select>
             </div>
