@@ -170,8 +170,8 @@ jobs:
           mkdir -p tests/percy
           
           cat > tests/percy/percy-tests.js << 'EOF'
-          const percySnapshot = require('@percy/cli/commands/snapshot');
-          const { percyAgentClient } = require('@percy/cli/dist/utils/sdk');
+          import percySnapshot from '@percy/cli/commands/snapshot';
+          import { percyAgentClient } from '@percy/cli/dist/utils/sdk';
           
           async function runPercyTests() {
             const pages = [
@@ -233,9 +233,9 @@ jobs:
           mkdir -p tests/screenshots/current
           
           cat > capture-screenshots.js << 'EOF'
-          const puppeteer = require('puppeteer');
-          const fs = require('fs');
-          const path = require('path');
+          import puppeteer from 'puppeteer';
+          import fs from 'fs';
+          import path from 'path';
           
           const pages = [
             { name: 'home', path: '/' },
@@ -254,7 +254,7 @@ jobs:
             for (const page of pages) {
               const browserPage = await browser.newPage();
               await browserPage.setViewport({ width: 1440, height: 900 });
-              await browserPage.goto(`http://localhost:8081${page.path}`, { 
+              await browserPage.goto(`http://localhost:4173${page.path}`, { 
                 waitUntil: 'networkidle2' 
               });
               
@@ -286,8 +286,8 @@ jobs:
         id: compare
         run: |
           cat > compare-screenshots.js << 'EOF'
-          const fs = require('fs');
-          const path = require('path');
+          import fs from 'fs';
+          import path from 'path';
           
           const currentDir = 'tests/screenshots/current';
           const baselineDir = 'tests/screenshots/baseline';

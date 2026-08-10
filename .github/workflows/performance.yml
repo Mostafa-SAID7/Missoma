@@ -208,7 +208,7 @@ jobs:
         id: perf-test
         run: |
           cat > perf-test.js << 'EOF'
-          const puppeteer = require('puppeteer');
+          import puppeteer from 'puppeteer';
           
           (async () => {
             const browser = await puppeteer.launch();

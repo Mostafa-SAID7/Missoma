@@ -77,9 +77,9 @@ jobs:
         id: axe-audit
         run: |
           cat > axe-audit.js << 'EOF'
-          const { chromium } = require('playwright');
-          const { injectAxe, checkPageA11y } = require('axe-playwright');
-          const fs = require('fs');
+          import { chromium } from 'playwright';
+          import { injectAxe, checkPageA11y } from 'axe-playwright';
+          import fs from 'fs';
           
           (async () => {
             const browser = await chromium.launch();
